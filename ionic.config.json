@@ -1,0 +1,8 @@
+{
+  "name": "eSmartIOT",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite",
+  "id": "ab0f6eac"
+}
