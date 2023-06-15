@@ -1,5 +1,5 @@
 import MessageListItem from '../components/MessageListItem';
-import { useState } from 'react';
+import React, {useState} from 'react';
 import { Message, getMessages } from '../data/messages';
 import {
   IonContent,
@@ -9,12 +9,11 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonTitle,
-  IonToolbar,
-  useIonViewWillEnter
+  IonToolbar, useIonViewWillEnter
 } from '@ionic/react';
 import './Home.css';
 
-const Home: React.FC = () => {
+const Home = () => {
 
   const [messages, setMessages] = useState<Message[]>([]);
 

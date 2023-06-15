@@ -2,7 +2,8 @@
   "name": "e-smart-iot",
   "private": true,
   "version": "0.0.1",
-  "type": "module",
+  "type": "commonjs",
+  "main": "public/main.js",
   "scripts": {
     "dev": "vite",
     "serve": "ionic serve",
@@ -10,7 +11,8 @@
     "preview": "vite preview",
     "test.e2e": "cypress run",
     "test.unit": "vitest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "electron:dev": "electron ."
   },
   "dependencies": {
     "-": "^0.0.1",
@@ -21,8 +23,11 @@
     "@capacitor/ios": "5.0.5",
     "@capacitor/keyboard": "5.0.4",
     "@capacitor/status-bar": "5.0.4",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@ionic/react": "^7.0.0",
     "@ionic/react-router": "^7.0.0",
+    "@mui/material": "^5.13.5",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
     "electron": "^25.1.0",
@@ -31,7 +36,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^5.3.4",
-    "react-router-dom": "^5.3.4",
     "terser": "^5.18.0"
   },
   "devDependencies": {
