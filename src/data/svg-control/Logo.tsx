@@ -1,10 +1,14 @@
 import React from "react";
 
-
-export  const Logo = () =>{
+export type LogoProps ={
+    size?: number;
+}
+export  const Logo = ({
+                size = 32
+                      }: LogoProps) =>{
     return <svg
-        width="64px"
-        height="64px"
+        width={`${size}px`}
+        height={`${size}px`}
         viewBox="0 0 24 24"
         id="meteor-icon-kit__regular-iot"
         fill="none"

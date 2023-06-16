@@ -1,3 +1,24 @@
-.w-fit{
-    width: fit-content;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.sc-ion-buttons-md-s ion-button:not(.button-round){
+    --border-radius: 4px !important;
+}
+
+a{
+    text-decoration-line: unset;
+}
+
+
+.bg-content{
+    --background: url("https://images.unsplash.com/photo-1626335507832-40da3b65de57?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80") no-repeat center center / cover;
+}
+
+.glass-theme{
+    background: rgba( 255, 255, 255, 0.4 ) !important;
+    box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 ) !important;
+    backdrop-filter: blur( 8px ) !important;
+    -webkit-backdrop-filter: blur( 8px ) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba( 255, 255, 255, 0.18 );
 }

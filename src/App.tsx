@@ -19,39 +19,17 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import './styles/index.css';
-import SignIn from "./pages/SignIn/SignIn";
-import SignUp from "./pages/SignUp/SignUp";
 import React from "react";
-import {Redirect, Route} from "react-router";
-import {IonApp, IonRouterOutlet, setupIonicReact} from '@ionic/react';
-import SystemControl from "./pages/SystemControl/SystemControl";
-import {IonReactRouter} from "@ionic/react-router";
+import {IonApp, setupIonicReact} from '@ionic/react';
+import AppRouter from "./AppRouter";
 
 
 setupIonicReact();
 
 const App = () => {
-
     return (
         <IonApp>
-            <IonReactRouter>
-                <IonRouterOutlet>
-                    <Route path="/" exact={true}>
-                        <Redirect to="/home"/>
-                    </Route>
-                    <Route component={SignIn} path="/sign-in">
-                    </Route>
-
-                    <Route component={SignUp} path="/sign-up">
-                    </Route>
-
-                    <Route component={SystemControl} path="/home" exact={true}>
-                    </Route>
-
-                    <Route component={ViewMessage} path="/message/:id">
-                    </Route>
-                </IonRouterOutlet>
-            </IonReactRouter>
+            <AppRouter/>
         </IonApp>
     );
 };

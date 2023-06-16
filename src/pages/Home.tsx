@@ -22,6 +22,7 @@ const Home = () => {
     setMessages(msgs);
   });
 
+  // eslint-disable-next-line no-undef
   const refresh = (e: CustomEvent) => {
     setTimeout(() => {
       e.detail.complete();
