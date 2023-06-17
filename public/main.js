@@ -14,9 +14,8 @@ const createWindow =  () =>{
        }
     });
 
-    const url = 'http://localhost:3000'
+    const url = 'http://localhost:3000';
     win.loadURL(url).then(() =>console.log(`loaded from url: ${url}`));
-
     win.webContents.openDevTools();
 }
 

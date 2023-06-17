@@ -1,47 +1,50 @@
 import {
-    IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCol,
-    IonContent,
-    IonFooter, IonGrid,
-    IonHeader, IonPage, IonRow, IonText, IonTitle,
+    IonButton, IonButtons, IonContent,
+    IonFooter, IonHeader, IonPage, IonRouterOutlet, IonText, IonTitle,
     IonToolbar
 } from "@ionic/react";
-import {Lamp, Logo, Motor} from "../../data/svg-control";
+import {Logo} from "../../data/svg-control";
 import React from "react";
 import {Link} from "react-router-dom";
-import Chart from 'react-apexcharts';
-import * as ReactApexChartProps from 'react-apexcharts'
+import {ListChart} from "../../components/ListChart";
+import {UiChartProp} from "../../components/UiChart";
+import {Redirect, Route} from "react-router";
+import {ChartDetail} from "../../components/ChartDetail";
 
 const SystemControl = () => {
 
-    const stateChart: ReactApexChartProps.Props = {
-        options:{
-            chart: {
-                type: 'radialBar'
-            },
-            plotOptions:{
-              radialBar:{
-                  hollow:{
-                      size: '70%'
-                  }
-              }
-            },
-            xaxis: {
-
-                categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999]
-            },
-            labels: ["Temperature"]
+    const dataCharts: UiChartProp[] = [
+        {
+            title: "Temperature",
+            value: 30,
+            label: 'Temperature',
+            formatter(val: number): string {
+                return `${val}%`;
+            }
         },
-        series:[
-          39
-        ],
-    };
+        {
+            title: "Soil",
+            value: 85,
+            label: 'Soil',
+            formatter(val: number): string {
+                return `${val}%`;
+            }
+        },
+        {
+            title: "Soil",
+            value: 750,
+            label: 'Light',
+            maxValue: 1000
+        },
+    ]
+
     return <IonPage>
         <IonHeader>
             <IonToolbar className={"ion-text-left"}>
                 <IonTitle size={"large"} className={"ion-align-items-center"}>
                     <IonText color={"dark"} className={"ion-margin flex gap-1 items-center"}>
                         <Logo/>
-                        <span className={"text-2xl text-gray-500 font-semibold"}>
+                        <span className={"ion-hide-sm-down text-2xl text-gray-500 font-semibold"}>
                              E-Smart IOT
                         </span>
                     </IonText>
@@ -56,49 +59,27 @@ const SystemControl = () => {
                             Login
                         </Link>
                     </IonButton>
-
                 </IonButtons>
             </IonToolbar>
         </IonHeader>
 
         <IonContent>
-            <IonGrid>
-                <IonRow>
-                    <IonCol size={'12'} sizeSm={'4'}>
-                        <IonCard >
-                            <IonCardHeader >
-                                Title
-                            </IonCardHeader>
-                            <IonCardContent>
-                                <Chart options={stateChart.options} type={'radialBar'} series={stateChart.series} ></Chart>
-                            </IonCardContent>
-                        </IonCard>
-                    </IonCol>
-
-                    <IonCol size={'12'} sizeSm={'4'}>
-                        <IonCard >
-                            <IonCardHeader >
-                                Title
-                            </IonCardHeader>
-                            <IonCardContent>
-                                <Chart options={stateChart.options} type={'radialBar'} series={stateChart.series} ></Chart>
-                            </IonCardContent>
-                        </IonCard>
-                    </IonCol>
-
-                    <IonCol size={'12'} sizeSm={'4'}>
-                        <IonCard>
-                            <IonCardHeader >
-                                Title
-                            </IonCardHeader>
-
-                            <IonCardContent>
-                                <Chart options={stateChart.options} type={'radialBar'} series={stateChart.series} ></Chart>
-                            </IonCardContent>
-                        </IonCard>
-                    </IonCol>
-                </IonRow>
-            </IonGrid>
+            <div className={'h-[50vh]'}>
+                <IonRouterOutlet>
+                    <Route path={""}>
+                        <Redirect to={'/home/system'}/>
+                    </Route>
+                    <Route path={"/home/system"} exact={true}>
+                        <ListChart data={dataCharts}/>
+                    </Route>
+                    <Route path={"/home/system/chart/:id"}>
+                        <ChartDetail></ChartDetail>
+                    </Route>
+                </IonRouterOutlet>
+            </div>
+            <div>
+                asdasd
+            </div>
         </IonContent>
 
         <IonFooter>

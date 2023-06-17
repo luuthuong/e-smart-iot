@@ -2,7 +2,7 @@ import {
     IonAlert,
     IonButton, IonCard, IonCardContent,
     IonCol, IonContent, IonGrid,
-    IonHeader, IonIcon, IonInput,
+    IonHeader, IonInput,
     IonPage,
     IonRouterLink,
     IonRow,
@@ -10,7 +10,6 @@ import {
     IonToolbar, useIonRouter
 } from "@ionic/react";
 import React, {useEffect, useState} from "react";
-import {personCircle} from "ionicons/icons";
 import {Logo} from "../../data/svg-control";
 
 const SignIn = () => {
@@ -18,8 +17,8 @@ const SignIn = () => {
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(false);
-    const [message, setMessage] = useState<string>("Error");
-    const [lengthPassword, setLengthPassword] = useState<number>(0);
+    const [message] = useState<string>("Error");
+    // const [lengthPassword, setLengthPassword] = useState<number>(0);
 
     useEffect(() => {
 

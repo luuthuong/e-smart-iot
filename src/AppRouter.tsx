@@ -19,7 +19,7 @@ const AppRouter = () =>
             <Route component={SignUp} path="/sign-up">
             </Route>
 
-            <Route component={SystemControl} path="/home" exact={true}>
+            <Route component={SystemControl} path="/home">
             </Route>
         </IonRouterOutlet>
     </IonReactRouter>
