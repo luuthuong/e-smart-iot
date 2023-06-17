@@ -13,6 +13,7 @@ const AppRouter = () =>
             <Route path="/" exact={true}>
                 <Redirect to="/home"/>
             </Route>
+
             <Route component={SignIn} path="/sign-in">
             </Route>
 

@@ -3,8 +3,8 @@ const {app, BrowserWindow} = require('electron');
 
 const createWindow =  () =>{
     const win = new BrowserWindow({
-       width: 800,
-       height: 600,
+       width: 960,
+       height: 678,
         title: 'E-Smart IOT',
         frame: true,
         center: true,
