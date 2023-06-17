@@ -1,4 +1,3 @@
-import MessageListItem from '../components/MessageListItem';
 import React, {useState} from 'react';
 import { Message, getMessages } from '../data/messages';
 import {
@@ -48,10 +47,6 @@ const Home = () => {
             </IonTitle>
           </IonToolbar>
         </IonHeader>
-
-        <IonList>
-          {messages.map(m => <MessageListItem key={m.id} message={m} />)}
-        </IonList>
       </IonContent>
     </IonPage>
   );
