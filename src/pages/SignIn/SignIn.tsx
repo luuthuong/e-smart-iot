@@ -66,7 +66,6 @@ const SignIn = () => {
                                     counter={true}
                                 >
                                 </IonInput>
-
                             </IonRow>
                             <IonRow>
                                 <IonInput

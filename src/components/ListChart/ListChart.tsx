@@ -6,7 +6,6 @@ import {IonCol, IonGrid, IonRow} from "@ionic/react";
 export const ListChart = ({
                               data = []
                           }: { data: UiChartProp[] }) => {
-
     return <IonGrid>
         <IonRow>
             {

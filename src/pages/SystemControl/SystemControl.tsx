@@ -1,42 +1,66 @@
 import {
-    IonButton, IonButtons, IonContent,
-    IonFooter, IonHeader, IonPage, IonRouterOutlet, IonText, IonTitle,
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonFooter,
+    IonHeader,
+    IonPage,
+    IonRouterOutlet,
+    IonText,
+    IonTitle,
     IonToolbar
 } from "@ionic/react";
 import {Logo} from "../../data/svg-control";
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {ListChart} from "../../components/ListChart";
 import {UiChartProp} from "../../components/UiChart";
-import {Redirect, Route} from "react-router";
+import {Route} from "react-router";
 import {ChartDetail} from "../../components/ChartDetail";
+import {ChartTypeEnum} from "../../shared";
+import {ChartConstant} from "../../shared/constant";
 
 const SystemControl = () => {
 
     const dataCharts: UiChartProp[] = [
         {
-            title: "Temperature",
-            value: 30,
-            label: 'Temperature',
+            title: ChartConstant[ChartTypeEnum.Temperature],
+            type: 'radialBar',
+            value: [30],
+            label: ChartConstant[ChartTypeEnum.Temperature],
             formatter(val: number): string {
                 return `${val}%`;
-            }
+            },
+            slug: ChartTypeEnum.Temperature
         },
         {
-            title: "Soil",
-            value: 85,
-            label: 'Soil',
+            title: ChartConstant[ChartTypeEnum.Soil],
+            type: 'radialBar',
+            value: [85],
+            label: ChartConstant[ChartTypeEnum.Soil],
             formatter(val: number): string {
                 return `${val}%`;
-            }
+            },
+            slug: ChartTypeEnum.Soil
         },
         {
-            title: "Soil",
-            value: 750,
-            label: 'Light',
-            maxValue: 1000
+            title: ChartConstant[ChartTypeEnum.Light],
+            type: 'radialBar',
+            value: [75],
+            label: ChartConstant[ChartTypeEnum.Light],
+            maxValue: 100,
+            slug: ChartTypeEnum.Light,
+            formatter(val: number): string {
+                return `${val}%`;
+            },
         },
-    ]
+    ];
+
+    const [data] = useState<UiChartProp[]>(dataCharts);
+
+    useEffect(() => {
+
+    },[])
 
     return <IonPage>
         <IonHeader>
@@ -64,15 +88,12 @@ const SystemControl = () => {
         </IonHeader>
 
         <IonContent>
-            <div className={'h-[50vh]'}>
-                <IonRouterOutlet>
-                    <Route path={""}>
-                        <Redirect to={'/home/system'}/>
+            <div className={'relative'}>
+                <IonRouterOutlet className={'relative'}>
+                    <Route path={"/home"} exact={true}>
+                        <ListChart data={data}/>
                     </Route>
-                    <Route path={"/home/system"} exact={true}>
-                        <ListChart data={dataCharts}/>
-                    </Route>
-                    <Route path={"/home/system/chart/:id"}>
+                    <Route path={"/home/chart/:id"}>
                         <ChartDetail></ChartDetail>
                     </Route>
                 </IonRouterOutlet>

@@ -13,10 +13,10 @@ const AppRouter = () =>
                 <Redirect to="/home"/>
             </Route>
 
-            <Route component={SignIn} path="/sign-in">
+            <Route component={SignIn} path="/sign-in" exact={true}>
             </Route>
 
-            <Route component={SignUp} path="/sign-up">
+            <Route component={SignUp} path="/sign-up" exact={true}>
             </Route>
 
             <Route component={SystemControl} path="/home">
