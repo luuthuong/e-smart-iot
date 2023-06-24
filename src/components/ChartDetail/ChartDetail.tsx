@@ -25,7 +25,20 @@ export const ChartDetail = () => {
     const router = useHistory();
     const params = useParams() as { id: string };
 
+    useEffect(() =>{
+        if (!params?.id)
+            return;
+        setLabel(ChartConstant[+params.id as ChartTypeEnum]);
+        setOption(+params.id as ChartTypeEnum);
+    }, []);
+
     useEffect(() => {
+        const temp =  [30, 40, 45, 50, 49, 60, 70, 91]
+        const soil =  [23, 33, 1, 77, 44, 23, 12, 91]
+        const light =  [19, 40, 45, 20, 99, 64, 72, 100]
+
+        const data= [temp,soil, light]
+
         setConfig(initChartConfig({
             type: 'line',
             label: 'Chart',
@@ -36,16 +49,12 @@ export const ChartDetail = () => {
             seriesOption: [
                 {
                     name: 'data',
-                    data: [30, 40, 45, 50, 49, 60, 70, 91]
+                    data: data[+params.id]
                 }
             ],
-            xAxisData: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
+            xAxisData: [22, 1992, 1993, 1994, 1995, 1996, 1997, 1998]
         }));
-        if (!params?.id)
-            return;
-        setLabel(ChartConstant[+params.id as ChartTypeEnum]);
-        setOption(+params.id as ChartTypeEnum);
-    }, []);
+    }, [option]);
 
     const handleRefresh =
         // eslint-disable-next-line no-undef
@@ -58,6 +67,8 @@ export const ChartDetail = () => {
 
     const onOptionChange = (e: IonSelectCustomEvent<SelectChangeEventDetail<ChartTypeEnum>>) => {
         router.push(`/home/chart/${e.detail.value}`);
+        setOption(e.detail.value);
+        setLabel(ChartConstant[e.detail.value as ChartTypeEnum]);
     }
 
     return <IonGrid>

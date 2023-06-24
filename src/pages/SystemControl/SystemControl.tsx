@@ -53,7 +53,7 @@ const SystemControl = () => {
             formatter(val: number): string {
                 return `${val}%`;
             },
-        },
+        }
     ];
 
     const [data] = useState<UiChartProp[]>(dataCharts);
