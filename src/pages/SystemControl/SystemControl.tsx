@@ -10,7 +10,7 @@ import {
     IonTitle,
     IonToolbar
 } from "@ionic/react";
-import {Logo} from "../../data/svg-control";
+import {Logo, Rain} from "../../data/svg-control";
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {ListChart} from "../../components/ListChart";
@@ -19,6 +19,7 @@ import {Route} from "react-router";
 import {ChartDetail} from "../../components/ChartDetail";
 import {ChartTypeEnum} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
+import Cloudy from "../../data/svg-control/Cloudy";
 
 const SystemControl = () => {
 
@@ -99,7 +100,8 @@ const SystemControl = () => {
                 </IonRouterOutlet>
             </div>
             <div>
-                asdasd
+                <Rain/>
+                <Cloudy/>
             </div>
         </IonContent>
 

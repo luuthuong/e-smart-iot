@@ -1,6 +1,8 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import {FirebaseDatabaseNode, FirebaseDatabaseProvider} from "@react-firebase/database";
+import {firebaseConfig} from "./database";
 
 // eslint-disable-next-line no-undef
 const container = document.getElementById('root');
@@ -8,6 +10,8 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(
   <React.StrictMode>
-        <App/>
+        <FirebaseDatabaseProvider {...firebaseConfig}>
+                <App/>
+        </FirebaseDatabaseProvider>
   </React.StrictMode>
 );
