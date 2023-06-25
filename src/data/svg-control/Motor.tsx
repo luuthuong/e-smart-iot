@@ -1,5 +1,9 @@
 import React from "react";
-export const Motor = () => {
+import {DeviceType} from "../../shared";
+
+export type MotorProps = DeviceType;
+export const Motor = ({active}: MotorProps) => {
+
     return <>
         <svg
             id="Layer_1"
@@ -24,7 +28,7 @@ export const Motor = () => {
                     x={16.696}
                     y={253.797}
                     style={{
-                        fill: "#B0B0B0",
+                        fill: active ? "#B0B0B0": "#95a5a6" ,
                     }}
                     width={55.786}
                     height={33.391}
@@ -32,20 +36,20 @@ export const Motor = () => {
                 <rect
                     y={211.178}
                     style={{
-                        fill: "#8B8B8B",
+                        fill: active ? "#8B8B8B" : "#95a5a6",
                     }}
                     width={33.391}
                     height={118.628}
                 />
                 <path
                     style={{
-                        fill: "#67B5F8",
+                        fill: active ? "#67B5F8" : "#95a5a6",
                     }}
                     d="M494.32,196.801l-4.858-8.131h-85.516v39.564h-8.557v-57.371h-44.32l-28.138-24.95h-46.53v-22.695 h14.966V89.828H172.742v33.391h14.966v22.695h-48.443l-28.138,24.95H55.791v199.255h83.474l58.709,52.054h197.414v-58.444h8.557 v39.565h85.516l4.858-8.132c1.81-3.027,17.68-31.537,17.68-99.181S496.13,199.83,494.32,196.801z"
                 />
                 <path
                     style={{
-                        fill: "#3D6DFA",
+                        fill: active ? "#3D6DFA" : "#95a5a6",
                     }}
                     d="M494.32,196.801l-4.858-8.131h-85.516v39.564h-8.557v-57.371h-44.32l-28.138-24.95h-46.53v-22.695 h14.966V89.828h-59.312v332.345h163.334v-58.444h8.557v39.565h85.516l4.858-8.132c1.81-3.027,17.68-31.537,17.68-99.181 S496.13,199.83,494.32,196.801z"
                 />

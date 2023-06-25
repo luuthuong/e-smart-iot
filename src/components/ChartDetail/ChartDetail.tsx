@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     IonCard,
     IonCardContent,
@@ -24,12 +24,20 @@ export const ChartDetail = () => {
     const [option, setOption] = useState<ChartTypeEnum>();
     const router = useHistory();
     const params = useParams() as { id: string };
+    const dateFromRef = useRef<HTMLIonDatetimeButtonElement | null>(null)
+    const dateToRef = useRef<HTMLIonDatetimeButtonElement | null>(null)
 
     useEffect(() =>{
         if (!params?.id)
             return;
         setLabel(ChartConstant[+params.id as ChartTypeEnum]);
         setOption(+params.id as ChartTypeEnum);
+
+        if(dateFromRef.current)
+            dateFromRef.current.datetime = 'dateFrom'
+
+        if(dateToRef.current)
+            dateToRef.current.datetime = 'dateTo'
 
     }, []);
 
@@ -80,16 +88,16 @@ export const ChartDetail = () => {
                         <span
                             className={'text-xl font-medium text-gray-800 flex items-center justify-center h-full w-[50px]'}>From</span>
                             <IonModal keepContentsMounted={true}>
-                                <IonDatetime presentation={'date'} id="dateFrom"></IonDatetime>
+                                <IonDatetime presentation={'date'} id={'dateFrom'}></IonDatetime>
                             </IonModal>
-                            <IonDatetimeButton datetime="dateFrom"></IonDatetimeButton>
+                            <IonDatetimeButton ref={dateFromRef}></IonDatetimeButton>
                         </IonCol>
 
                         <IonCol className={'flex gap-x-1 mx-auto justify-center'} size={'12'} sizeMd={'12'} sizeLg={'6'}>
                         <span className={'text-xl font-medium text-gray-800 flex items-center justify-center h-full w-[50px]'}>
                             To
                         </span>
-                            <IonDatetimeButton datetime="dateTo"></IonDatetimeButton>
+                            <IonDatetimeButton ref={dateToRef}></IonDatetimeButton>
                             <IonModal keepContentsMounted={true}>
                                 <IonDatetime presentation={'date'} id="dateTo"></IonDatetime>
                             </IonModal>

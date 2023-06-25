@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 .sc-ion-buttons-md-s ion-button:not(.button-round){
     --border-radius: 4px !important;
 }

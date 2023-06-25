@@ -10,7 +10,7 @@ import {
     IonTitle,
     IonToolbar
 } from "@ionic/react";
-import {Logo, Rain} from "../../data/svg-control";
+import {Logo} from "../../data/svg-control";
 import React, {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
 import {ListChart} from "../../components/ListChart";
@@ -19,7 +19,9 @@ import {Route} from "react-router";
 import {ChartDetail} from "../../components/ChartDetail";
 import {ChartTypeEnum} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
-import Cloudy from "../../data/svg-control/Cloudy";
+import {barcodeOutline, pin, sunnyOutline} from "ionicons/icons";
+import {ControlPanel} from "../../components/ControlPanel/ControlPanel";
+import {FirebaseDatabaseNode} from "@react-firebase/database";
 
 const SystemControl = () => {
 
@@ -32,7 +34,8 @@ const SystemControl = () => {
             formatter(val: number): string {
                 return `${val}%`;
             },
-            slug: ChartTypeEnum.Temperature
+            slug: ChartTypeEnum.Temperature,
+            icon: pin
         },
         {
             title: ChartConstant[ChartTypeEnum.Soil],
@@ -42,7 +45,8 @@ const SystemControl = () => {
             formatter(val: number): string {
                 return `${val}%`;
             },
-            slug: ChartTypeEnum.Soil
+            slug: ChartTypeEnum.Soil,
+            icon: barcodeOutline
         },
         {
             title: ChartConstant[ChartTypeEnum.Light],
@@ -54,6 +58,7 @@ const SystemControl = () => {
             formatter(val: number): string {
                 return `${val}%`;
             },
+            icon: sunnyOutline
         }
     ];
 
@@ -61,7 +66,7 @@ const SystemControl = () => {
 
     useEffect(() => {
 
-    },[])
+    }, [])
 
     return <IonPage>
         <IonHeader>
@@ -100,15 +105,14 @@ const SystemControl = () => {
                 </IonRouterOutlet>
             </div>
             <div>
-                <Rain/>
-                <Cloudy/>
+                <ControlPanel/>
             </div>
         </IonContent>
 
         <IonFooter>
             Footer
         </IonFooter>
-    </IonPage>;
+    </IonPage>
 }
 
 export default SystemControl;

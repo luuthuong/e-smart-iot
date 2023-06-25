@@ -14,6 +14,11 @@ export type ChartName = {
     [x in ChartTypeEnum]: string
 };
 
+export type ChartLimit = {
+    high?: string;
+    low?: string;
+}
+
 export type ChartConfig = {
     formatter?(val: number): string;
     value?: (string| number)[];
