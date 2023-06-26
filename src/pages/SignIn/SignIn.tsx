@@ -91,7 +91,7 @@ const SignIn = () => {
                             <IonRow>
                                 <IonCol>
                                     <p>
-                                        Dont have any account?
+                                        Don't have any account?
                                         <IonRouterLink routerLink={"/sign-up"} color={"danger"} className={""}>Sign
                                             Up</IonRouterLink>
                                     </p>
