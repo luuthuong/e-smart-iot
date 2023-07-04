@@ -21,6 +21,8 @@ import {ChartTypeEnum} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
 import {barcodeOutline, pin, sunnyOutline} from "ionicons/icons";
 import {ControlPanel} from "../../components/ControlPanel/ControlPanel";
+import {database} from "../../database";
+import {onValue, ref, set} from "firebase/database";
 
 const SystemControl = () => {
 
@@ -64,7 +66,13 @@ const SystemControl = () => {
     const [data] = useState<UiChartProp[]>(dataCharts);
 
     useEffect(() => {
-
+         onValue(ref(database, '/users/' + 1), (snapshot) => {
+            const username = (snapshot.val() && snapshot.val().username) || 'Anonymous';
+            console.log(username)
+            // ...
+        }, {
+            onlyOnce: false
+        })
     }, [])
 
     return <IonPage>
