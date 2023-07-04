@@ -21,7 +21,6 @@ import {ChartTypeEnum} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
 import {barcodeOutline, pin, sunnyOutline} from "ionicons/icons";
 import {ControlPanel} from "../../components/ControlPanel/ControlPanel";
-import {FirebaseDatabaseNode} from "@react-firebase/database";
 
 const SystemControl = () => {
 
