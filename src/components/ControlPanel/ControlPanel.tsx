@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Lamp, Motor, Pump} from "../../data/svg-control";
 import {
     IonCard,
@@ -9,10 +9,40 @@ import {
     IonGrid, IonItemDivider,
     IonLabel,
     IonRow,
-    IonToggle
+    IonToggle, ToggleChangeEventDetail
 } from "@ionic/react";
+import { IonToggleCustomEvent } from "@ionic/core";
+import {onValue, ref, set} from "firebase/database";
+import {database} from "../../database";
 
 export const ControlPanel = () => {
+    const controller = 'settings/manualController';
+    const settingMode = 'settings/mode';
+    const toggleRefs = useRef<(HTMLIonToggleElement | null)[]>([]);
+    const [textMode, setTextMode] = useState<'Auto' | 'Manual'>('Auto');
+    const observableDeviceChange = ( path: string, refIonToggle: HTMLIonToggleElement | null, callback?: (val: boolean) => void) =>{
+        onValue(ref(database, `settings/${path}`), (snapshot) =>{
+            if(refIonToggle)
+                refIonToggle.checked = snapshot.val();
+            if(callback)
+                callback(snapshot.val());
+        });
+    }
+    useEffect(() =>{
+        observableDeviceChange('manualController/pump', toggleRefs.current[0]);
+        observableDeviceChange('manualController/lamp', toggleRefs.current[1]);
+        observableDeviceChange('manualController/motor', toggleRefs.current[2]);
+        observableDeviceChange('mode', toggleRefs.current[3], (val) =>{
+            setTextMode(val ? 'Auto' : 'Manual');
+        });
+    }, []);
+
+    const onTriggerDevice = (evt: IonToggleCustomEvent<ToggleChangeEventDetail<any>>) =>{
+        const {value: path , checked} = evt.detail;
+        set(ref(database, path), checked).then(() =>{
+        });
+    }
+
     return (
         <IonGrid>
             <IonRow>
@@ -28,22 +58,22 @@ export const ControlPanel = () => {
                                 <IonRow>
                                     <IonCol className={'flex flex-col justify-center items-center'} size={'4'}>
                                         <Pump/>
-                                        <IonToggle className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
+                                        <IonToggle ref={x => toggleRefs.current[0] = x} value={`${controller}/pump`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
                                     <IonCol className={'flex  flex-col justify-center items-center'} size={'4'}>
                                         <Lamp/>
-                                        <IonToggle className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
+                                        <IonToggle ref={x => toggleRefs.current[1] = x}  value={`${controller}/lamp`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
                                     <IonCol className={'flex  flex-col justify-center items-center'} size={'4'}>
                                         <Motor/>
-                                        <IonToggle className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
+                                        <IonToggle ref={x => toggleRefs.current[2] = x}  value={`${controller}/motor`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
                                 </IonRow>
                                 <IonItemDivider></IonItemDivider>
                                 <IonRow>
                                     <IonCol size={'auto'} className={'mx-auto'}>
-                                        <IonToggle color={'dark'} checked={true}>
-                                            <IonLabel>Manual</IonLabel>
+                                        <IonToggle ref={x => toggleRefs.current[3] = x} value={settingMode} onIonChange={onTriggerDevice} color={'dark'} >
+                                            <IonLabel>{textMode}</IonLabel>
                                         </IonToggle>
                                     </IonCol>
                                 </IonRow>

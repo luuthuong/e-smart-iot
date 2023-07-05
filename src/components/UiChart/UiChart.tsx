@@ -1,15 +1,17 @@
 import {
+    IonButton, IonButtons,
     IonCard,
     IonCardContent,
     IonCardHeader,
     IonCardSubtitle,
-    IonChip, IonCol, IonGrid,
-    IonIcon, IonItem, IonLabel, IonRow, IonText, IonTitle,
+    IonChip, IonCol, IonContent, IonGrid,
+    IonHeader,
+    IonIcon, IonInput, IonItem, IonLabel, IonModal, IonRow, IonText, IonTitle, IonToolbar,
 } from "@ionic/react";
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Chart from "react-apexcharts";
 import * as ReactApexChartProps from "react-apexcharts";
-import {arrowForward} from 'ionicons/icons'
+import {arrowForward, createOutline} from 'ionicons/icons'
 import {Link} from "react-router-dom";
 import {ChartConfig, ChartLimit, ChartTypeEnum, initChartConfig} from "../../shared";
 
@@ -36,6 +38,12 @@ const UiChart = ({
                  }: UiChartProp) => {
 
     const [config, setConfig] = useState<ReactApexChartProps.Props | undefined>(undefined);
+    const modalConfigLimit = useRef<HTMLIonModalElement>(null);
+    const [message, setMessage] = useState(
+        'This modal example uses triggers to automatically open a modal when the button is clicked.'
+    );
+    const input = useRef<HTMLIonInputElement>(null);
+
 
     useEffect(() => {
         if (!value)
@@ -77,23 +85,48 @@ const UiChart = ({
                     {subTitle}
                 </IonCardSubtitle>
             }
-            <IonCardContent className={'h-[300px]'}>
+            <IonCardContent className={'h-[350px] md:h-[300px]'}>
+
+                <IonModal ref={modalConfigLimit} trigger={slug?.toString() || ''}>
+                    <IonHeader>
+                        <IonToolbar>
+                            <IonButtons slot="start">
+                                <IonButton onClick={() => modalConfigLimit.current?.dismiss()}>Cancel</IonButton>
+                            </IonButtons>
+                            <IonTitle>Welcome</IonTitle>
+                            <IonButtons slot="end">
+                                <IonButton strong={true} >
+                                    Confirm
+                                </IonButton>
+                            </IonButtons>
+                        </IonToolbar>
+                    </IonHeader>
+                    <IonContent className="ion-padding">
+                        <IonItem>
+                            <IonLabel position="stacked">Enter your name</IonLabel>
+                            <IonInput ref={input} type="text" placeholder="Your name" />
+                        </IonItem>
+                    </IonContent>
+                </IonModal>
+
                 <IonItem>
                     <IonGrid>
                         <IonRow>
-                            <IonCol size={'auto'} className={'mr-2 flex justify-start items-center '}>
-                                <IonText className={'font-semibold text-gray-500'}>Setting</IonText>
-                            </IonCol>
-                            <IonCol size={'4'} className={'flex justify-start items-center gap-x-1'}>
-                                <IonText>HIGH</IonText>
+                            <IonCol sizeSm={'6'} sizeMd={'4'} className={'flex justify-start items-center gap-x-0.5'}>
+                                <IonText className={'text-sm'}>H</IonText>
                                 <IonChip disabled color={'dark'}>
                                     {high}
                                 </IonChip>
                             </IonCol>
-                            <IonCol size={'4'}  className={'flex justify-start items-center gap-x-1'}>
-                                <IonText>LOW</IonText>
+                            <IonCol sizeSm={'6'} sizeMd={'4'}  className={'flex justify-start items-center gap-x-0.5'}>
+                                <IonText className={'text-sm'}>L</IonText>
                                 <IonChip disabled color={'dark'}>
                                     {low}
+                                </IonChip>
+                            </IonCol>
+                            <IonCol sizeSm={'12'} sizeMd={'4'} className={'flex justify-center items-center '}>
+                                <IonChip id={slug?.toString() || ''} outline={true} color={'light'}>
+                                    <IonIcon color={'dark'} icon={createOutline}></IonIcon>
                                 </IonChip>
                             </IonCol>
                         </IonRow>

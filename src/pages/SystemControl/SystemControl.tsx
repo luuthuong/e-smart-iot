@@ -17,12 +17,12 @@ import {ListChart} from "../../components/ListChart";
 import {UiChartProp} from "../../components/UiChart";
 import {Route} from "react-router";
 import {ChartDetail} from "../../components/ChartDetail";
-import {ChartTypeEnum} from "../../shared";
+import {ActValue, ChartTypeEnum, Sensor} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
 import {barcodeOutline, pin, sunnyOutline} from "ionicons/icons";
 import {ControlPanel} from "../../components/ControlPanel/ControlPanel";
 import {database} from "../../database";
-import {onValue, ref, set} from "firebase/database";
+import {DataSnapshot, onValue, ref, set} from "firebase/database";
 
 const SystemControl = () => {
 
@@ -63,17 +63,22 @@ const SystemControl = () => {
         }
     ];
 
-    const [data] = useState<UiChartProp[]>(dataCharts);
+    const [data, setData] = useState<UiChartProp[]>(dataCharts);
 
     useEffect(() => {
-         onValue(ref(database, '/users/' + 1), (snapshot) => {
-            const username = (snapshot.val() && snapshot.val().username) || 'Anonymous';
-            console.log(username)
-            // ...
+        onValue(ref(database, '/actValues/sensors'), (snapshot: DataSnapshot) => {
+            const actSensors: Sensor = snapshot.val();
+            setData(prev =>{
+                const data =[...prev];
+                data[0].value = [actSensors.temp];
+                data[1].value = [actSensors.soil];
+                data[2].value = [actSensors.light];
+                return data;
+            })
         }, {
             onlyOnce: false
         })
-    }, [])
+    }, []);
 
     return <IonPage>
         <IonHeader>

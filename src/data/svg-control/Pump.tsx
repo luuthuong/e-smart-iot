@@ -1,12 +1,16 @@
 import * as React from "react";
 import {DeviceType} from "../../shared";
 import {useEffect, useState} from "react";
+import {onValue, ref} from "firebase/database";
+import {database} from "../../database";
 export type PumpProps = DeviceType;
-export const Pump = ({active = false}: PumpProps) => {
-    const [color, setColor] = useState<string| null>(null);
+export const Pump = () => {
+    const [color, setColor] = useState<string| null>('#2c3e50');
     useEffect(() =>{
-        setColor(active ? '#32b2ff' : '#2c3e50');
-    },[active])
+        onValue(ref(database, 'actValues/devices/pump'),(snapshot) =>{
+            setColor(snapshot.val() ? '#32b2ff' : '#2c3e50');
+        });
+    },[])
     return (
         color ? <svg
             width="84px"

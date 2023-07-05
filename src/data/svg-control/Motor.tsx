@@ -1,9 +1,15 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {DeviceType} from "../../shared";
+import {onValue, ref} from "firebase/database";
+import {database} from "../../database";
 
-export type MotorProps = DeviceType;
-export const Motor = ({active}: MotorProps) => {
-
+export const Motor = () => {
+    const [active, setActive] = useState();
+    useEffect(() =>{
+        onValue(ref(database, 'actValues/devices/motor'),(snapshot) =>{
+            setActive(snapshot.val());
+        });
+    },[]);
     return <>
         <svg
             id="Layer_1"
