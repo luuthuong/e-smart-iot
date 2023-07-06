@@ -77,7 +77,7 @@ const SystemControl = () => {
             })
         }, {
             onlyOnce: false
-        })
+        });
     }, []);
 
     return <IonPage>

@@ -8,8 +8,7 @@ import {
     IonCol,
     IonGrid, IonItemDivider,
     IonLabel,
-    IonRow,
-    IonToggle, ToggleChangeEventDetail
+    IonRow, IonToggle, ToggleChangeEventDetail
 } from "@ionic/react";
 import { IonToggleCustomEvent } from "@ionic/core";
 import {onValue, ref, set} from "firebase/database";
@@ -49,7 +48,7 @@ export const ControlPanel = () => {
                 <IonCol size={'12'} className={'mx-auto'} sizeLg={'8'}>
                     <IonCard>
                         <IonCardHeader>
-                            <IonCardTitle className={'ion-text-center'}>
+                            <IonCardTitle className={'ion-text-center text-3xl font-semibold text-gray-500'}>
                                 Control Panel
                             </IonCardTitle>
                         </IonCardHeader>
@@ -57,14 +56,17 @@ export const ControlPanel = () => {
                             <IonGrid>
                                 <IonRow>
                                     <IonCol className={'flex flex-col justify-center items-center'} size={'4'}>
+                                        <IonLabel className={'text-lg font-semibold'}>Pump</IonLabel>
                                         <Pump/>
                                         <IonToggle ref={x => toggleRefs.current[0] = x} value={`${controller}/pump`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
                                     <IonCol className={'flex  flex-col justify-center items-center'} size={'4'}>
+                                        <IonLabel className={'text-lg font-semibold'}>Lamp</IonLabel>
                                         <Lamp/>
                                         <IonToggle ref={x => toggleRefs.current[1] = x}  value={`${controller}/lamp`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
                                     <IonCol className={'flex  flex-col justify-center items-center'} size={'4'}>
+                                        <IonLabel className={'text-lg font-semibold'}>Motor</IonLabel>
                                         <Motor/>
                                         <IonToggle ref={x => toggleRefs.current[2] = x}  value={`${controller}/motor`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
@@ -73,7 +75,7 @@ export const ControlPanel = () => {
                                 <IonRow>
                                     <IonCol size={'auto'} className={'mx-auto'}>
                                         <IonToggle ref={x => toggleRefs.current[3] = x} value={settingMode} onIonChange={onTriggerDevice} color={'dark'} >
-                                            <IonLabel>{textMode}</IonLabel>
+                                            <IonLabel className={'w-[50px] block font-medium'}>{textMode}</IonLabel>
                                         </IonToggle>
                                     </IonCol>
                                 </IonRow>

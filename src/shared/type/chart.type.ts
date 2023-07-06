@@ -15,8 +15,8 @@ export type ChartName = {
 };
 
 export type ChartLimit = {
-    high?: string;
-    low?: string;
+    high?: number;
+    low?: number;
 }
 
 export type ChartConfig = {
