@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <NTPClient.h>  
 #include <WiFi.h> 
 #include <WiFiUdp.h>
@@ -45,17 +44,17 @@
 #define WIFI_PASSWORD "datrinh318"
 
 /* 2. Define the API Key */
-#define API_KEY "AIzaSyCV5dscu0g92iEAEBVa42Da6_Kjd_9YRDo"
+#define API_KEY "AIzaSyDW2CyYpd_sjTfqt2a76ugJ_xZUJ-x76Sc"
 
 /* 3. Define the RTDB URL */
-#define DATABASE_URL "https://iotf-dc824-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+#define DATABASE_URL "https://e-smart-iot-default-rtdb.asia-southeast1.firebasedatabase.app/" 
 
 /* 4. Define the user Email and password that alreadey registerd or added in your project */
 #define USER_EMAIL "admin@gmail.com"
 #define USER_PASSWORD "123456"
 
 /* 5. Define the project ID */
-#define FIREBASE_PROJECT_ID "iotf-dc824"
+#define FIREBASE_PROJECT_ID "e-smart-iot"
 
 //define sensor pin temp
 #define ONE_WIRE_BUS 16
@@ -79,8 +78,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 BH1750 lightMeter(0x23);
 
 // declare var to get values from firebase
-String parentPath = "/Setting";
-String childPath[3] = {"/SetLimit", "/Manual", "/Mode"};
+String parentPath = "/settings";
+String childPath[3] = {"/limits", "/mannualController", "/mode"};
 int count = 0;
 volatile bool dataChanged = false;
 
@@ -210,30 +209,30 @@ void childPathMode(int value, String path) {
 }
 
 void childPathLimit(int value, String path) {
-  if (path.indexOf("/SetLimit/Light/High") >= 0) {
+  if (path.indexOf("/limits/light/high") >= 0) {
     lHigh = value;
-    Serial.println("Light High: " + String(lHigh));
+    Serial.println("light high: " + String(lHigh));
   }
-  else if (path.indexOf("/SetLimit/Light/Low") >= 0) {
+  else if (path.indexOf("/limits/light/low") >= 0) {
     lLow = value;
     Serial.println("Light Low: " + String(lLow));
   }
-  else if (path.indexOf("/SetLimit/Soil/High") >= 0) {
+  else if (path.indexOf("/limits/soil/high") >= 0) {
     sHigh = value;
-    Serial.println("Soil High: " + String(sHigh));
+    Serial.println("soil High: " + String(sHigh));
   }
-  else if (path.indexOf("/SetLimit/Soil/Low") >= 0) {
+  else if (path.indexOf("/limits/soil/low") >= 0) {
     sLow = value;
     Serial.println("Soil Low: " + String(sLow));
   }
-  else if (path.indexOf("/SetLimit/Temperature/High") >= 0) {
+  else if (path.indexOf("/limits/temp/high") >= 0) {
     tHigh = value;
     setpointTemp = tHigh;
     Serial.println(setpointTemp);
     Serial.println("Temp High: " + String(tHigh));
     
   }
-  else if (path.indexOf("/SetLimit/Temperature/Low") >= 0) {
+  else if (path.indexOf("/limits/temp/low") >= 0) {
     tLow = value;
     Serial.println("Temp Low: " + String(tLow));
   }
@@ -302,7 +301,7 @@ void task (void* parameters)
       Setpoint = map(setpointTemp , 0, 100, 0, 4095);
       myPID.Compute();
       Input =  map(globalTemp, 0, 100, 0, 4095);
-      analogWrite(PIN_OUTPUT, Output);
+      // analogWrite(PIN_OUTPUT, 2);
       vTaskDelay(10 / portTICK_PERIOD_MS); // delay 10ms
    }
   }
