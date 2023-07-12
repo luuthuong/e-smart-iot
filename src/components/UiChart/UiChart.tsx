@@ -102,10 +102,6 @@ const UiChart = ({
     const onSaveLimit = (evt: CustomEvent<OverlayEventDetail>) =>{
         const {role, data} = evt.detail;
         if(role === 'confirm'){
-            if(inValidInput(data)){
-                presentToast('Input data invalid, please check again!', 'danger');
-                return;
-            }
             set(ref(database, getLimit(slug!)),data).then(res =>{
                 presentToast('Success', 'success');
             });
@@ -115,12 +111,18 @@ const UiChart = ({
     const confirm = () =>{
         if([iHigh, iLow].some(x => !x || !x.current))
             return;
-        modalConfigLimit?.current?.dismiss({
+
+        const data = {
             high: iHigh?.current?.value,
             low: iLow?.current?.value
-        } as Limit, 'confirm');
-    }
+        } as Limit;
 
+        if(inValidInput(data)){
+            presentToast('Input data invalid, please check again!', 'danger');
+            return;
+        }
+        modalConfigLimit?.current?.dismiss(data, 'confirm');
+    }
 
     return (
       <>
