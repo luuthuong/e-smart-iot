@@ -9,14 +9,13 @@ private:
   FirebaseConfig config;
   FirebaseAuth auth;
   FirebaseData fbdo;
-  FirebaseJson* json;
   bool _reconnect;
 public:
   Database();
   FirebaseData stream;
+  FirebaseJson json;
   bool canExecute();
   void connectFirebase();
-  void setJson(String path, void(*callback)(FirebaseJson *));
   void beginMultiPathStream(String parentPath);
   void setString(String path, String value);
   String getString(String path);

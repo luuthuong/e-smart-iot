@@ -81,11 +81,3 @@ float Database::getFloat(String path)
     Firebase.getFloat(this->fbdo, path);
     return fbdo.floatData();
 }
-
-void Database::setJson(String path, void (*callback)(FirebaseJson *))
-{
-    json->iteratorBegin();
-    callback(json);
-    Firebase.setJSONAsync(this->fbdo, path, *json);
-    this->json->iteratorEnd();
-}

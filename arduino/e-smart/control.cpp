@@ -1,5 +1,30 @@
 #include "control.h"
+#include "OneWire.h"
+#include "DallasTemperature.h"
+#include "Wire.h"
+#include "BH1750.h"
+#include "SPI.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_SSD1306.h"
+#include "DHT.h"
+#include "PID_v1.h"
 #include "util.h"
+
+#define ONE_WIRE_BUS 16
+#define PIN_SOIL 39
+#define PIN_RAIN 14
+#define PIN_PUMP 12
+#define PIN_FAN 1
+
+#define PIN_EN_MOTOR 15
+#define PIN_LIMIT_LEFT 0
+#define PIN_LIMIT_RIGHT 2
+#define PIN_LAMP 13
+
+#define MAX_SPEED 255
+#define MIN_SPEED 0
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
 
 const String parentPath = "/test";
 const String childPath[2] = {"/node1", "/node2"};
@@ -23,19 +48,34 @@ void streamTimeoutCallback(bool timeout)
         Serial.println("stream timed out, resuming...\n");
 }
 
+void Control::initDisplay()
+{
+}
+
 void Control::autoMode()
 {
-    this->db.setJson("/test/json", [](FirebaseJson* json){
-        json->set("id", 0);
-        json->set("name", "Thuong");
-        json->set("createdDate", Util::getCurrentDate());
-    });
+    this->db.json.iteratorBegin();
+
+    this->db.json.iteratorEnd();
+}
+
+void Control::syncDb()
+{
 }
 
 void Control::mannualMode()
 {
 }
 
+void Control::setup()
+{
+    this->connectFirebase();
+    this->initPinMode();
+}
+
+void Control::initPinMode()
+{
+}
 void Control::connectFirebase()
 {
     this->db.connectFirebase();
@@ -45,10 +85,17 @@ void Control::connectFirebase()
 
 void Control::run()
 {
+    this->syncDb();
     this->autoMode();
     this->mannualMode();
     if (!this->db.stream.httpConnected())
         Serial.println("Server was disconnected!");
+}
+
+void Control::initPid()
+{
+    this->setPoint = map(this->setpointTemp, 0, 100, 0 4095);
+    this->pid.SetMode(1);
 }
 
 bool Control::canExecute()

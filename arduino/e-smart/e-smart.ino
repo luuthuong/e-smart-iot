@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "util.h"
-#include "control.h";
+#include "control.h"
 
 #define DEFAULT_BAUD 9600
 #define INTERVAL 500
@@ -11,7 +11,7 @@ void setup() {
   Serial.begin(DEFAULT_BAUD);
   Util::connectWifi();
   Util::beginTimeClient();
-  ctrl.connectFirebase();
+  ctrl.setup();
 }
 
 void loop() {
