@@ -62,6 +62,27 @@ PID pid(&pidInput, &pidOutput, &setPoint, consKp, consKi, consKd, DIRECT);
 const String parentPath = "/settings";
 const String childPath[3] = {"/limits", "/manualController", "/mode"};
 
+bool getRainValue()
+{
+    return digitalRead(PIN_RAIN) == LOW;
+}
+
+int getSoilValue()
+{
+    int value = analogRead(PIN_SOIL);
+    return (100 - map((value), 0, 4095, 0, 100));
+}
+
+float getLightValue()
+{
+    return lightMeter.readLightLevel();
+}
+
+float getTemperatureValue()
+{
+    return sensors.getTempCByIndex(0);
+}
+
 void updateLimitChange(Limit *limit, String path, String value, String valueType, String displayName)
 {
     if (valueType == "json")

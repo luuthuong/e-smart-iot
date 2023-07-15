@@ -7,16 +7,18 @@
 Control ctrl;
 unsigned long prevMillis = 0;
 
-void setup() {
+void setup()
+{
   Serial.begin(DEFAULT_BAUD);
   Util::connectWifi();
   Util::beginTimeClient();
   ctrl.setup();
 }
 
-void loop() {
+void loop()
+{
   bool isReady = ctrl.canExecute() && (millis() - prevMillis > INTERVAL || prevMillis == 0);
-  if(!isReady)
+  if (!isReady)
     return;
   prevMillis = millis();
   ctrl.run();
