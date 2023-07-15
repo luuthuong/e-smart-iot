@@ -3,7 +3,7 @@
 #include "control.h"
 
 #define DEFAULT_BAUD 9600
-#define INTERVAL 500
+#define INTERVAL 1000
 Control ctrl;
 unsigned long prevMillis = 0;
 

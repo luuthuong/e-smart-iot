@@ -29,7 +29,7 @@ void Util::beginTimeClient()
   timeClient.begin();
 }
 
-String *splitString(String str, char delimiter)
+String *Util::splitString(String str, char delimiter)
 {
   int index = 0;
   int start = 0;
@@ -49,7 +49,6 @@ String *splitString(String str, char delimiter)
     start = index + 1;
     i++;
   }
-
   return tokens;
 }
 
