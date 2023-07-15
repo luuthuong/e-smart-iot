@@ -1,6 +1,5 @@
 #include "db.h"
 #include <Arduino.h>
-#include "FirebaseESP32.h"
 #include <addons/TokenHelper.h>
 #include <addons/RTDBHelper.h>
 
@@ -34,50 +33,72 @@ void Database::connectFirebase()
 
 void Database::beginMultiPathStream(String parentPath)
 {
-    if (!Firebase.beginMultiPathStream(this->stream, parentPath))
+    if (!Firebase.RTDB.beginMultiPathStream(&this->stream, parentPath))
         Serial.println("stream begin error");
 }
 
 void Database::setString(String path, String value)
 {
-    Firebase.setString(this->fbdo, path, value);
+    Firebase.RTDB.setString(&this->fbdo, path, value);
 }
 
 String Database::getString(String path)
 {
-    Firebase.getString(this->fbdo, path);
+    Firebase.RTDB.getString(&this->fbdo, path);
     return fbdo.to<const char *>();
 }
 
 void Database::setInt(String path, int value)
 {
-    Firebase.setInt(this->fbdo, path, value);
+    Firebase.RTDB.setInt(&this->fbdo, path, value);
 }
 
 int Database::getInt(String path)
 {
-    Firebase.getInt(this-> fbdo, path);
-    return fbdo.intData();
+    Firebase.RTDB.getInt(&this->fbdo, path);
+    return fbdo.to<int>();
 }
 
 void Database::setBoolean(String path, bool value)
 {
-    Firebase.setBool(this ->fbdo, path, value);
+    Firebase.RTDB.setBool(&this->fbdo, path, value);
 }
 
 bool Database::getBoolean(String path)
 {
-    Firebase.getBool(this-> fbdo, path);
-    return fbdo.boolData();
+    Firebase.RTDB.getBool(&this->fbdo, path);
+    return fbdo.to<bool>();
 }
 
 void Database::setFloat(String path, float value)
 {
-    Firebase.setFloat(this->fbdo, path, value);
+    Firebase.RTDB.setFloat(&this->fbdo, path, value);
 }
 
 float Database::getFloat(String path)
 {
-    Firebase.getFloat(this->fbdo, path);
-    return fbdo.floatData();
+    Firebase.RTDB.getFloat(&this->fbdo, path);
+    return fbdo.to<float>();
+}
+
+String Database::getProjectId()
+{
+    return FIREBASE_PROJECT_ID;
+}
+
+void Database::commitDocument(String path, FirebaseJson json)
+{
+    std::vector<struct fb_esp_firestore_document_write_t> writes;
+    struct fb_esp_firestore_document_write_t transform_write;
+    transform_write.type = fb_esp_firestore_document_write_type_transform;
+    transform_write.document_transform.transform_document_path = path;
+    struct fb_esp_firestore_document_write_field_transforms_t field_transforms;
+    field_transforms.fieldPath = "items";
+    field_transforms.transform_type = fb_esp_firestore_transform_type_append_missing_elements;
+    field_transforms.transform_content = json.raw();
+    transform_write.document_transform.field_transforms.push_back(field_transforms);
+    writes.push_back(transform_write);
+    bool result = Firebase.Firestore.commitDocument(&this->fbdo, this->getProjectId(), "", writes, "");
+    if (!result)
+        Serial.println(this->fbdo.errorReason());
 }

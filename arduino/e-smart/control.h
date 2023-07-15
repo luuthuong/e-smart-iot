@@ -13,11 +13,14 @@ private:
     void initDisplay();
     void autoMode();
     void mannualMode();
-    void syncDb();
+    void motorControl(int speed, int direct);
+    void syncSensorLog();
+    void syncDeviceLog();
 
 public:
     void setup();
     void run();
+    void syncDb();
     void initStream();
     bool canExecute();
 };

@@ -19,6 +19,8 @@
 #define PIN_FAN 1
 
 #define PIN_EN_MOTOR 15
+#define PIN_TURN_RIGHT 26
+#define PIN_TURN_LEFT 25
 #define PIN_LIMIT_LEFT 0
 #define PIN_LIMIT_RIGHT 2
 #define PIN_LAMP 13
@@ -27,6 +29,9 @@
 #define MIN_SPEED 0
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+
+#define LEFT_DIRECT 0
+#define RIGHT_DIRECT 1
 
 const String LIGHT = "light";
 const String TEMP = "temp";
@@ -174,7 +179,7 @@ void pathChangeHandler(String path, String value, String valueType)
     }
 }
 
-void streamCallback(MultiPathStreamData stream)
+void streamCallback(MultiPathStream stream)
 {
     size_t childLenght = sizeof(childPath) / sizeof(childPath[0]);
     for (size_t i = 0; i < childLenght; i++)
@@ -207,7 +212,7 @@ void Control::connectFirebase()
 {
     this->db.connectFirebase();
     this->db.beginMultiPathStream(parentPath);
-    Firebase.setMultiPathStreamCallback(this->db.stream, streamCallback, streamTimeoutCallback);
+    Firebase.RTDB.setMultiPathStreamCallback(&this->db.stream, streamCallback, streamTimeoutCallback);
 }
 
 void Control::run()
@@ -219,12 +224,68 @@ void Control::run()
         Serial.println("Server was disconnected!");
 }
 
+void Control::syncSensorLog()
+{
+    String currentDate = Util::getCurrentDate();
+    String currentTime = Util::getCurrentTime();
+    String documentPath = "History-Sensor/" + currentDate;
+    FirebaseJson content;
+    content.set("values/[0]/mapValue/fields/light/integerValue", 20);
+    content.set("values/[0]/mapValue/fields/rain/integerValue", 20);
+    content.set("values/[0]/mapValue/fields/soil/integerValue", 20);
+    content.set("values/[0]/mapValue/fields/temperature/integerValue", 20);
+    content.set("values/[0]/mapValue/fields/time/stringValue", currentDate + " " + currentTime);
+    this->db.commitDocument(documentPath, content);
+}
+
+void Control::syncDeviceLog()
+{
+    String currentDate = Util::getCurrentDate();
+    String currentTime = Util::getCurrentTime();
+    String documentPath = "History-Device/" + currentDate;
+    FirebaseJson content;
+    content.set("values/[0]/mapValue/fields/pump/booleanValue", true);
+    content.set("values/[0]/mapValue/fields/light/booleanValue", true);
+    content.set("values/[0]/mapValue/fields/motor/booleanValue", true);
+    content.set("values/[0]/mapValue/fields/fan/booleanValue", true);
+    content.set("values/[0]/mapValue/fields/time/stringValue", currentDate + " " + currentTime);
+    this->db.commitDocument(documentPath, content);
+}
+
 void Control::syncDb()
 {
+    this->syncDeviceLog();
+    this->syncSensorLog();
 }
 
 void Control::mannualMode()
 {
+}
+// direct = 0 LEFT, direct =  1 RIGHT
+void Control::motorControl(int speed, int direct)
+{
+    int limitLeft = digitalRead(PIN_LIMIT_LEFT);
+    int limitRight = digitalRead(PIN_LIMIT_RIGHT);
+    speed = (speed, MIN_SPEED, MAX_SPEED);
+    analogWrite(PIN_EN_MOTOR, speed);
+    if ((direct == LEFT_DIRECT && limitLeft == LOW) || limitRight == LOW)
+    {
+        digitalWrite(PIN_TURN_LEFT, LOW);
+        digitalWrite(PIN_TURN_RIGHT, LOW);
+    }
+    switch (direct)
+    {
+    case LEFT_DIRECT:
+        digitalWrite(PIN_TURN_RIGHT, LOW);
+        digitalWrite(PIN_TURN_LEFT, HIGH);
+        break;
+    case RIGHT_DIRECT:
+        digitalWrite(PIN_TURN_RIGHT, HIGH);
+        digitalWrite(PIN_TURN_LEFT, LOW);
+        break;
+    default:
+        return;
+    }
 }
 
 void Control::autoMode()

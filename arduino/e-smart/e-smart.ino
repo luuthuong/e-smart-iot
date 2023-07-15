@@ -3,7 +3,7 @@
 #include "control.h"
 
 #define DEFAULT_BAUD 9600
-#define INTERVAL 1000
+#define INTERVAL 5000
 Control ctrl;
 unsigned long prevMillis = 0;
 
@@ -20,4 +20,5 @@ void loop() {
     return;
   prevMillis = millis();
   ctrl.run();
+  ctrl.syncDb();
 }

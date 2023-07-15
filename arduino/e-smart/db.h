@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "FirebaseESP32.h"
+#include <Firebase_ESP_Client.h>
 
 #ifndef db_h
 #define db_h
@@ -8,12 +8,12 @@ class Database
 private:
   FirebaseConfig config;
   FirebaseAuth auth;
-  FirebaseData fbdo;
   bool _reconnect;
 public:
   Database();
   FirebaseData stream;
   FirebaseJson json;
+  FirebaseData fbdo;
   bool canExecute();
   void connectFirebase();
   void beginMultiPathStream(String parentPath);
@@ -25,5 +25,7 @@ public:
   bool getBoolean(String path);
   void setFloat(String path, float value);
   float getFloat(String path);
+  String getProjectId();
+  void commitDocument(String path, FirebaseJson json);
 };
 #endif
