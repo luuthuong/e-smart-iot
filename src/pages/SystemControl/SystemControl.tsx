@@ -17,12 +17,12 @@ import {ListChart} from "../../components/ListChart";
 import {UiChartProp} from "../../components/UiChart";
 import {Route} from "react-router";
 import {ChartDetail} from "../../components/ChartDetail";
-import {ActValue, ChartTypeEnum, Sensor} from "../../shared";
+import {ChartTypeEnum, Sensor} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
 import {barcodeOutline, pin, sunnyOutline} from "ionicons/icons";
 import {ControlPanel} from "../../components/ControlPanel/ControlPanel";
 import {database} from "../../database";
-import {DataSnapshot, onValue, ref, set} from "firebase/database";
+import {DataSnapshot, onValue, ref} from "firebase/database";
 
 const SystemControl = () => {
 
@@ -70,7 +70,7 @@ const SystemControl = () => {
             const actSensors: Sensor = snapshot.val();
             setData(prev =>{
                 const data =[...prev];
-                data[0].value = [actSensors.temp];
+                data[0].value = [actSensors.temperature];
                 data[1].value = [actSensors.soil];
                 data[2].value = [actSensors.light];
                 return data;

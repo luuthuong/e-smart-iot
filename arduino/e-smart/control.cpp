@@ -249,13 +249,12 @@ void Control::syncSensorLog()
 {
     String currentDate = Util::getCurrentDate();
     String currentTime = Util::getCurrentTime();
-    String documentPath = "History-Sensor/" + currentDate;
+    String documentPath = "History-Sensor/";
     FirebaseJson content;
-    content.set("values/[0]/mapValue/fields/light/integerValue", 20);
-    content.set("values/[0]/mapValue/fields/rain/integerValue", 20);
-    content.set("values/[0]/mapValue/fields/soil/integerValue", 20);
-    content.set("values/[0]/mapValue/fields/temperature/integerValue", 20);
-    content.set("values/[0]/mapValue/fields/time/stringValue", currentDate + " " + currentTime);
+    content.set("fields/light/integerValue", 20);
+    content.set("fields/rain/integerValue", 20);
+    content.set("fields/soil/integerValue", 20);
+    content.set("fields/temperature/integerValue", 20);
     this->db.commitDocument(documentPath, content);
 }
 
@@ -263,13 +262,12 @@ void Control::syncDeviceLog()
 {
     String currentDate = Util::getCurrentDate();
     String currentTime = Util::getCurrentTime();
-    String documentPath = "History-Device/" + currentDate;
+    String documentPath = "History-Device/";
     FirebaseJson content;
-    content.set("values/[0]/mapValue/fields/pump/booleanValue", true);
-    content.set("values/[0]/mapValue/fields/light/booleanValue", true);
-    content.set("values/[0]/mapValue/fields/motor/booleanValue", true);
-    content.set("values/[0]/mapValue/fields/fan/booleanValue", true);
-    content.set("values/[0]/mapValue/fields/time/stringValue", currentDate + " " + currentTime);
+    content.set("fields/pump/booleanValue", true);
+    content.set("fields/light/booleanValue", true);
+    content.set("fields/motor/booleanValue", true);
+    content.set("fields/fan/booleanValue", true);
     this->db.commitDocument(documentPath, content);
 }
 

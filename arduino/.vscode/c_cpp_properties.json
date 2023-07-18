@@ -257,6 +257,7 @@
                 "C:\\Users\\LuuThuong\\Documents\\Arduino\\libraries\\DHT_sensor_library",
                 "C:\\Users\\LuuThuong\\Documents\\Arduino\\libraries\\PID",
                 "C:\\Users\\LuuThuong\\Documents\\Arduino\\libraries\\ArduinoJson\\src",
+                "C:\\Users\\LuuThuong\\Documents\\Arduino\\libraries\\UUID",
                 "C:\\Users\\LuuThuong\\Documents\\Arduino\\libraries\\NTPClient",
                 "C:\\Users\\LuuThuong\\Documents\\Arduino\\libraries\\Adafruit_Unified_Sensor",
                 "c:\\users\\luuthuong\\appdata\\local\\arduino15\\packages\\esp32\\tools\\xtensa-esp32-elf-gcc\\esp-2021r2-patch5-8.4.0\\xtensa-esp32-elf\\include\\c++\\8.4.0",

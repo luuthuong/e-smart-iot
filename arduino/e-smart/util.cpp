@@ -3,6 +3,7 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include "Arduino.h"
+#include "UUID.h"
 
 #define WIFI_SSID "TDT"
 #define WIFI_PASSWORD "0869564467"
@@ -10,6 +11,8 @@
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", UTC_OFFSET_IN_SECONDS);
+UUID uuid;
+
 
 void Util::connectWifi()
 {
@@ -78,4 +81,9 @@ String Util::getCurrentDate()
   String dayStr = day < 10 ? "0" + String(day) : String(day);
 
   return dayStr + "-" + monthStr + "-" + yearStr;
+}
+
+String Util::createID(){
+  uuid.generate();
+  return String(uuid.toCharArray());
 }

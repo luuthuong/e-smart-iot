@@ -9,5 +9,6 @@ class Util{
     static String getCurrentDate();
     static void beginTimeClient();
     static String *splitString(String str, char delimiter);
+    static String createID();
 };
 #endif
