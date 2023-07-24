@@ -2,83 +2,32 @@ import {
     IonButton,
     IonButtons,
     IonContent,
-    IonFooter,
-    IonHeader,
+    IonFooter, IonHeader,
     IonPage,
     IonRouterOutlet,
     IonText,
     IonTitle,
-    IonToolbar
+    IonToolbar, useIonRouter
 } from "@ionic/react";
-import {Logo} from "../../data/svg-control";
 import React, {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
-import {ListChart} from "../../components/ListChart";
-import {UiChartProp} from "../../components/UiChart";
+import {ChartDetail, ControlPanel, ListChart} from "../../components";
 import {Route} from "react-router";
-import {ChartDetail} from "../../components/ChartDetail";
-import {ChartTypeEnum, Sensor} from "../../shared";
-import {ChartConstant} from "../../shared/constant";
-import {barcodeOutline, pin, sunnyOutline} from "ionicons/icons";
-import {ControlPanel} from "../../components/ControlPanel/ControlPanel";
-import {database} from "../../database";
-import {DataSnapshot, onValue, ref} from "firebase/database";
+import {Logo} from "../../data/svg-control";
+import {Link} from "react-router-dom";
+import History from "../History/History";
 
 const SystemControl = () => {
-
-    const dataCharts: UiChartProp[] = [
-        {
-            title: ChartConstant[ChartTypeEnum.Temperature],
-            type: 'radialBar',
-            value: [30],
-            label: ChartConstant[ChartTypeEnum.Temperature],
-            formatter(val: number): string {
-                return `${val}%`;
-            },
-            slug: ChartTypeEnum.Temperature,
-            icon: pin
-        },
-        {
-            title: ChartConstant[ChartTypeEnum.Soil],
-            type: 'radialBar',
-            value: [85],
-            label: ChartConstant[ChartTypeEnum.Soil],
-            formatter(val: number): string {
-                return `${val}%`;
-            },
-            slug: ChartTypeEnum.Soil,
-            icon: barcodeOutline
-        },
-        {
-            title: ChartConstant[ChartTypeEnum.Light],
-            type: 'radialBar',
-            value: [75],
-            label: ChartConstant[ChartTypeEnum.Light],
-            maxValue: 100,
-            slug: ChartTypeEnum.Light,
-            formatter(val: number): string {
-                return `${val}%`;
-            },
-            icon: sunnyOutline
-        }
-    ];
-
-    const [data, setData] = useState<UiChartProp[]>(dataCharts);
+    const [back, setBack] = useState(false);
+    const router = useIonRouter();
 
     useEffect(() => {
-        onValue(ref(database, '/actValues/sensors'), (snapshot: DataSnapshot) => {
-            const actSensors: Sensor = snapshot.val();
-            setData(prev =>{
-                const data =[...prev];
-                data[0].value = [actSensors.temperature];
-                data[1].value = [actSensors.soil];
-                data[2].value = [actSensors.light];
-                return data;
-            })
-        }, {
-            onlyOnce: false
-        });
-    }, []);
+        if (router.routeInfo.pathname === '/history') {
+            setBack(true);
+            return;
+        }
+        setBack(false);
+        console.log(router)
+    }, [router]);
 
     return <IonPage>
         <IonHeader>
@@ -96,6 +45,11 @@ const SystemControl = () => {
                         Report
                     </IonButton>
 
+                    <Link onClick={evt => evt.stopPropagation()} to={back ? "/" : "/history"}>
+                        <IonButton color={back ? "dark" :"warning"} fill={"solid"}>
+                            {back ? 'Back' : 'History'}
+                        </IonButton>
+                    </Link>
                     <IonButton color={"medium"} fill={"solid"}>
                         <Link to={"/sign-in"}>
                             Login
@@ -108,16 +62,13 @@ const SystemControl = () => {
         <IonContent>
             <div className={'relative'}>
                 <IonRouterOutlet className={'relative'}>
-                    <Route path={"/home"} exact={true}>
-                        <ListChart data={data}/>
+                    <Route path={'/system'}>
+                        <HomeRouterOutlet/>
                     </Route>
-                    <Route path={"/home/chart/:id"}>
-                        <ChartDetail></ChartDetail>
+                    <Route path={'/history'} exact={true}>
+                        <History/>
                     </Route>
                 </IonRouterOutlet>
-            </div>
-            <div>
-                <ControlPanel/>
             </div>
         </IonContent>
 
@@ -125,6 +76,24 @@ const SystemControl = () => {
             Footer
         </IonFooter>
     </IonPage>
+}
+
+const HomeRouterOutlet = () => {
+    return <>
+        <div className={'relative home-control-outlet'}>
+            <IonRouterOutlet className={'relative'}>
+                <Route path={"/system"} exact={true}>
+                    <ListChart/>
+                </Route>
+                <Route path={"/system/chart/:id"} >
+                    <ChartDetail></ChartDetail>
+                </Route>
+            </IonRouterOutlet>
+        </div>
+        <div>
+            <ControlPanel/>
+        </div>
+    </>
 }
 
 export default SystemControl;

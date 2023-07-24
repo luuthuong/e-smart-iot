@@ -1,4 +1,3 @@
-
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -18,10 +17,10 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import './styles/index.css';
-import React, {createContext, Dispatch, SetStateAction, useState} from "react";
+import React, {useState} from "react";
 import {IonApp, IonBackdrop, setupIonicReact} from '@ionic/react';
 import AppRouter from "./AppRouter";
-import { BackDropContext } from './shared/context';
+import {BackDropContext} from './shared/context';
 
 
 setupIonicReact();

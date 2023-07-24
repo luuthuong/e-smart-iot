@@ -251,10 +251,10 @@ void Control::syncSensorLog()
     String currentTime = Util::getCurrentTime();
     String documentPath = "History-Sensor/";
     FirebaseJson content;
-    content.set("fields/light/integerValue", 20);
-    content.set("fields/rain/integerValue", 20);
-    content.set("fields/soil/integerValue", 20);
-    content.set("fields/temperature/integerValue", 20);
+    content.set("fields/light/integerValue", random(34,85));
+    content.set("fields/rain/booleanValue", false);
+    content.set("fields/soil/integerValue", random(12,90));
+    content.set("fields/temperature/integerValue", random(12,37));
     this->db.commitDocument(documentPath, content);
 }
 

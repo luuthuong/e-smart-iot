@@ -5,21 +5,19 @@ import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import SystemControl from "./pages/SystemControl/SystemControl";
 import {IonReactRouter} from "@ionic/react-router";
+import History from "./pages/History/History";
+
 
 const AppRouter = () =>
     <IonReactRouter>
         <IonRouterOutlet>
-            <Route path="/" exact={true}>
-                <Redirect to="/home"/>
-            </Route>
-
             <Route component={SignIn} path="/sign-in" exact={true}>
             </Route>
 
             <Route component={SignUp} path="/sign-up" exact={true}>
             </Route>
 
-            <Route component={SystemControl} path="/home">
+            <Route component={SystemControl} path="">
             </Route>
         </IonRouterOutlet>
     </IonReactRouter>

@@ -10,7 +10,7 @@ import {
     IonInput,
     IonItem,
     IonLabel,
-    IonRow,
+    IonRow, IonSkeletonText,
     IonText,
     useIonToast,
 } from "@ionic/react";
@@ -48,6 +48,8 @@ const UiChart = ({
     const [editMode, setEditMode] = useState(false);
     const iHigh = useRef<HTMLIonInputElement>(null);
     const iLow = useRef<HTMLIonInputElement>(null);
+
+    const [loading, setLoading] = useState(true);
 
 
     const [present] = useIonToast();
@@ -96,6 +98,13 @@ const UiChart = ({
             const response: Limit = snapshot.val();
             setLimit(response);
         });
+
+        const timeout = setTimeout(() =>{
+            setLoading(false);
+        }, 200);
+        return () =>{
+            clearTimeout(timeout);
+        }
     }, [value]);
 
     const inValidInput = (...params: Limit[]) => {
@@ -142,7 +151,7 @@ const UiChart = ({
                             }
                             <IonLabel className={'text-grey-700 text-lg text-grey-700'}>{title}</IonLabel>
                         </IonChip>
-                        <Link to={`/home/chart/${slug}`}>
+                        <Link to={`/system/chart/${slug}`}>
                             <IonChip color={"light"} slot={"end"}>
                                 <IonIcon color={'primary'} icon={arrowForward}>
                                 </IonIcon>
@@ -163,35 +172,44 @@ const UiChart = ({
                                 <IonCol sizeSm={'6'} sizeMd={'4'}
                                         className={'flex justify-start items-center gap-x-0.5'}>
                                     <IonText className={'text-md font-semibold text-gray-600 mr-2'}>H</IonText>
-                                    {!editMode ? <IonChip disabled color={'dark'}>
-                                            {limit.high}
-                                        </IonChip> :
-                                        <IonInput ref={iHigh} type="number" value={limit.high}
-                                                  placeholder="00"></IonInput>}
+                                    {
+                                        loading ?
+                                            <IonSkeletonText animated={true}
+                                                             className={'w-8 h-6 rounded-xl'}></IonSkeletonText>
+                                            : !editMode ? <IonChip disabled color={'dark'}>
+                                                    {limit.high}
+                                                </IonChip> :
+                                                <IonInput ref={iHigh} type="number" value={limit.high}
+                                                          placeholder="00"></IonInput>}
                                 </IonCol>
                                 <IonCol sizeSm={'6'} sizeMd={'4'}
                                         className={'flex justify-start items-center gap-x-0.5'}>
                                     <IonText className={'text-md font-semibold text-gray-600 mr-2'}>L</IonText>
                                     {
-                                        !editMode ? <IonChip disabled color={'dark'}>
-                                            {limit.low}
-                                        </IonChip> : <IonInput ref={iLow} type="number" value={limit.low}
-                                                               placeholder="00"></IonInput>
+                                        loading ?
+                                            <IonSkeletonText animated={true}
+                                                             className={'w-8 h-6 rounded-xl'}></IonSkeletonText>
+                                            : !editMode ? <IonChip disabled color={'dark'}>
+                                                {limit.low}
+                                            </IonChip> : <IonInput ref={iLow} type="number" value={limit.low}
+                                                                   placeholder="00"></IonInput>
                                     }
                                 </IonCol>
                                 <IonCol sizeSm={'12'} sizeMd={'4'} className={'flex justify-center items-center '}>
-                                    <IonChip onClick={onEditMode} color={'light'}>
+                                    {!loading && <IonChip onClick={onEditMode} color={'light'}>
                                         <IonIcon color={'dark'}
                                                  icon={!editMode ? createOutline : checkmarkOutline}></IonIcon>
-                                    </IonChip>
+                                    </IonChip>}
                                 </IonCol>
                             </IonRow>
                         </IonGrid>
                     </IonItem>
                     {
-                        config &&
-                        <Chart height={'250'} options={config.options} type={'radialBar'}
-                               series={config.series}></Chart>
+                        loading ? <div className={'w-full h-[220px] flex items-center justify-center'}>
+                            <IonSkeletonText animated={true} className={' w-40 h-40 rounded-full '}></IonSkeletonText>
+                        </div> : config &&
+                            <Chart height={'250'} options={config.options} type={'radialBar'}
+                                   series={config.series}></Chart>
                     }
                 </IonCardContent>
             </IonCard>

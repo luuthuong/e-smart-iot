@@ -29,7 +29,7 @@ export default function initChartConfig(config: ChartConfig){
                     },
                     track: {
                         background: '#fff',
-                        strokeWidth: '67%',
+                        strokeWidth: '50%',
                         margin: 0, // margin is in pixels
                         dropShadow: {
                             enabled: true,
@@ -53,11 +53,15 @@ export default function initChartConfig(config: ChartConfig){
                             fontSize: '36px',
                             show: true
                         }
-                    }
+                    },
                 }
             },
             xaxis: {
               categories: config.xAxisData ?? []
+            },
+            yaxis:{
+              max: config.maxValue ?? undefined,
+                min: config.minValue ?? undefined
             },
             colors: ["#526D82"],
             fill: {
@@ -74,7 +78,12 @@ export default function initChartConfig(config: ChartConfig){
                 }
             },
             stroke: {
-                lineCap: 'round'
+                lineCap: 'round',
+                curve: 'smooth',
+                width: 3
+            },
+            markers:{
+              size: 4
             },
             labels: [config.label ?? ""],
         },

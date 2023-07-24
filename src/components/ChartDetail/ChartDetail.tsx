@@ -15,7 +15,7 @@ import {
     IonRefresherContent,
     IonRow,
     IonSelect,
-    IonSelectOption,
+    IonSelectOption, IonSkeletonText,
     IonToggle,
     RefresherEventDetail,
     SelectChangeEventDetail
@@ -51,13 +51,15 @@ export const ChartDetail = () => {
     const dateFromRef = useRef<HTMLIonDatetimeElement | null>(null);
     const dateToRef = useRef<HTMLIonDatetimeElement | null>(null);
 
+    const [loading, setLoading] = useState(true);
+
+
+
     useEffect(() => {
         if (!params?.id)
             return;
         setLabel(ChartConstant[+params.id as ChartTypeEnum]);
         setOption(+params.id as ChartTypeEnum);
-
-
     }, []);
 
     const getPathByType = (): 'light' | 'soil' | 'temperature' => {
@@ -74,6 +76,7 @@ export const ChartDetail = () => {
     }
 
     useEffect(() => {
+        setLoading(true);
         if (realtimeMode) {
             const data: ChartDetailData[] = [];
             const interval = setInterval(() => {
@@ -91,7 +94,7 @@ export const ChartDetail = () => {
                 const initConfig = initChartConfig({
                     type: 'line',
                     label: 'Chart',
-                    maxValue: 100,
+                    maxValue: realtimeMode ? undefined : 100,
                     formatter(val: number): string {
                         return `${val}%`;
                     },
@@ -104,20 +107,26 @@ export const ChartDetail = () => {
                     xAxisData: data.map(x => x.time)
                 });
                 setConfig({...initConfig});
-
+                setLoading(false)
             }, 1000);
+
             return () => {
                 clearInterval(interval);
             }
         }
 
+        const timeout = setTimeout(() => {
+            setLoading(false)
+        }, 200);
         onFilterHistorySensor();
-
+        return () => {
+            clearTimeout(timeout);
+        }
     }, [realtimeMode, option]);
 
     const onFilterHistorySensor = (from?: Date, to?: Date) => {
 
-        if(from && to && from > to)
+        if (from && to && from > to)
             throw ('filter invalid');
 
         let timeStampFrom: Timestamp | null = from ? Timestamp.fromDate(from) : Timestamp.fromDate(new Date(0));
@@ -167,7 +176,7 @@ export const ChartDetail = () => {
         };
 
     const onOptionChange = (e: IonSelectCustomEvent<SelectChangeEventDetail<ChartTypeEnum>>) => {
-        router.push(`/home/chart/${e.detail.value}`);
+        router.push(`/system/chart/${e.detail.value}`);
         setOption(e.detail.value);
         setLabel(ChartConstant[e.detail.value as ChartTypeEnum])
     }
@@ -224,7 +233,7 @@ export const ChartDetail = () => {
 
                             <div className={'flex ion-justify-content-between ion-align-items-center'}>
                                 <div className={'flex items-center gap-x-1'}>
-                                    <Link to={"/home"}>
+                                    <Link to={"/system"}>
                                         <IonChip color={"light"} className={"w-fit flex justify-center"}>
                                             <IonIcon color={"primary"} icon={arrowBackOutline}></IonIcon>
                                         </IonChip>
@@ -254,9 +263,12 @@ export const ChartDetail = () => {
                         </IonCardHeader>
                         <IonCardContent>
                             {
-                                config &&
-                                <Chart options={config?.options} type={'line'} height={300}
-                                       series={config?.series}/>
+                                loading ? <IonSkeletonText className={'h-[300px] rounded-md'}
+                                                           animated={true}></IonSkeletonText>
+                                    :
+                                    config &&
+                                    <Chart options={config?.options} type={'line'} height={300}
+                                           series={config?.series}/>
                             }
                         </IonCardContent>
                     </IonCard>

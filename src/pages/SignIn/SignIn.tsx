@@ -18,14 +18,13 @@ const SignIn = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState(false);
     const [message] = useState<string>("Error");
-    // const [lengthPassword, setLengthPassword] = useState<number>(0);
 
     useEffect(() => {
 
     }, []);
     const router = useIonRouter();
     const onSignIn = () => {
-        router.push("/home","forward");
+        router.push("/system","forward");
     }
 
     return (
