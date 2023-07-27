@@ -11,7 +11,7 @@ import {
 } from "@ionic/react";
 import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
-import {Route} from "react-router";
+import {Redirect, Route} from "react-router";
 import {Logo} from "../../data/svg-control";
 import {Link} from "react-router-dom";
 import History from "../History/History";
@@ -62,6 +62,9 @@ const SystemControl = () => {
         <IonContent>
             <div className={'relative'}>
                 <IonRouterOutlet className={'relative'}>
+                    <Route>
+                        <Redirect to={'/system'}/>
+                    </Route>
                     <Route path={'/system'}>
                         <HomeRouterOutlet/>
                     </Route>
