@@ -1,5 +1,6 @@
 const {app, BrowserWindow} = require('electron');
 
+const isDev = require('electron-is-dev');
 
 const createWindow =  () =>{
     const win = new BrowserWindow({
@@ -14,9 +15,10 @@ const createWindow =  () =>{
        }
     });
 
-    const url = 'http://localhost:3000';
+    const url = isDev ? 'http://localhost:3000' : 'https://e-smart-iot.web.app';
     win.loadURL(url).then(() =>console.log(`loaded from url: ${url}`));
-    win.webContents.openDevTools();
+    if(isDev)
+        win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);

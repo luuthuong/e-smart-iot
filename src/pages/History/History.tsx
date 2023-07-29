@@ -17,9 +17,7 @@ import {visuallyHidden} from '@mui/utils';
 import {alpha, Box, FormControl, FormControlLabel, Radio, RadioGroup, TableSortLabel} from "@mui/material";
 import {IonIcon} from "@ionic/react";
 import {filterOutline, trashOutline} from "ionicons/icons";
-import {getHistorySensorByFilter} from "../../services";
 import {DeviceFilterResponse, SensorFilterResponse} from "../../shared";
-import moment from "moment";
 
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
