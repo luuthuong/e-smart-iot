@@ -14,20 +14,13 @@ import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import {visuallyHidden} from '@mui/utils';
-import {alpha, Box, TableSortLabel} from "@mui/material";
+import {alpha, Box, FormControl, FormControlLabel, Radio, RadioGroup, TableSortLabel} from "@mui/material";
 import {IonIcon} from "@ionic/react";
 import {filterOutline, trashOutline} from "ionicons/icons";
+import {getHistorySensorByFilter} from "../../services";
+import {DeviceFilterResponse, SensorFilterResponse} from "../../shared";
+import moment from "moment";
 
-
-function createData(
-    name: string,
-    calories: number,
-    fat: number,
-    carbs: number,
-    protein: number,
-) {
-    return {name, calories, fat, carbs, protein};
-}
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -50,13 +43,6 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 }));
 
 
-interface Data {
-    calories: number;
-    carbs: number;
-    fat: number;
-    name: string;
-    protein: number;
-}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
@@ -70,19 +56,13 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 type Order = 'asc' | 'desc';
 
-function getComparator<Key extends keyof any>(
-    order: Order,
-    orderBy: Key,
-): (
-    a: { [key in Key]: number | string },
-    b: { [key in Key]: number | string },
-) => number {
+function getComparator<T>(order: Order, orderBy: keyof T): (a:T , b: T) => number {
     return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
         : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) {
+function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
     const stabilizedThis = array.map((el, index) => [el, index] as [T, number]);
     stabilizedThis.sort((a, b) => {
         const order = comparator(a[0], b[0]);
@@ -95,78 +75,89 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 }
 
 
-interface HeadCell {
+interface HeadCell<T> {
     disablePadding: boolean;
-    id: keyof Data;
+    id: keyof T;
     label: string;
     numeric: boolean;
 }
 
-const rows = [
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Donut', 452, 25.0, 51, 4.9),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-    createData('Honeycomb', 408, 3.2, 87, 6.5),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Jelly Bean', 375, 0.0, 94, 0.0),
-    createData('KitKat', 518, 26.0, 65, 7.0),
-    createData('Lollipop', 392, 0.2, 98, 0.0),
-    createData('Marshmallow', 318, 0, 81, 2.0),
-    createData('Nougat', 360, 19.0, 9, 37.0),
-    createData('Oreo', 437, 18.0, 63, 4.0),
-];
-
-
-const headCells: readonly HeadCell[] = [
+const headCellSensor: HeadCell<SensorFilterResponse>[] = [
     {
-        id: 'name',
+        id: 'time',
         numeric: false,
         disablePadding: true,
-        label: 'Dessert (100g serving)',
+        label: 'Time',
     },
     {
-        id: 'calories',
+        id: 'soil',
         numeric: true,
         disablePadding: false,
-        label: 'Calories',
+        label: 'Soil',
     },
     {
-        id: 'fat',
+        id: 'temperature',
         numeric: true,
         disablePadding: false,
-        label: 'Fat (g)',
+        label: 'Temperature',
     },
     {
-        id: 'carbs',
+        id: 'light',
         numeric: true,
         disablePadding: false,
-        label: 'Carbs (g)',
+        label: 'Light',
     },
     {
-        id: 'protein',
+        id: 'rain',
         numeric: true,
         disablePadding: false,
-        label: 'Protein (g)',
+        label: 'Rain',
+    },
+];
+
+const headCellDevice: HeadCell<DeviceFilterResponse>[] = [
+    {
+        id: 'time',
+        numeric: false,
+        disablePadding: true,
+        label: 'Time',
+    },
+    {
+        id: 'fan',
+        numeric: true,
+        disablePadding: false,
+        label: 'Fan',
+    },
+    {
+        id: 'pump',
+        numeric: true,
+        disablePadding: false,
+        label: 'Pump',
+    },
+    {
+        id: 'motor',
+        numeric: true,
+        disablePadding: false,
+        label: 'Motor',
     },
 ];
 
 
-interface EnhancedTableProps {
+interface EnhancedTableProps<T> {
     numSelected: number;
-    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
+    onRequestSort: (event: React.MouseEvent<unknown>, property: keyof T) => void;
     onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
     order: Order;
-    orderBy: string;
+    orderBy: keyof (SensorFilterResponse & DeviceFilterResponse);
     rowCount: number;
+    data: HeadCell<T>[];
 }
 
-function EnhancedTableHead(props: EnhancedTableProps) {
-    const {onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort} =
+function EnhancedTableHead<T extends {id : string}>(props: EnhancedTableProps<T>) {
+    const {onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, data} =
         props;
     const createSortHandler =
-        (property: keyof Data) => (event: React.MouseEvent<unknown>) => {
+        (property: keyof T) => (event: React.MouseEvent<unknown>) => {
             onRequestSort(event, property);
         };
 
@@ -184,10 +175,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                         }}
                     />
                 </StyledTableCell>
-                {
-                    headCells.map((headCell) => (
+                { data.length &&
+                    data.map((headCell, index) => (
                         <StyledTableCell
-                            key={headCell.id}
+                            key={index}
                             align={headCell.numeric ? 'right' : 'left'}
                             padding={headCell.disablePadding ? 'none' : 'normal'}
                             sortDirection={orderBy === headCell.id ? order : false}
@@ -212,8 +203,15 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 
+enum ViewType {
+    Device,
+    Sensor
+}
+
 interface EnhancedTableToolbarProps {
     numSelected: number;
+    typeViewValue: ViewType,
+    handleChangeTypeViewChange: React.Dispatch<React.SetStateAction<ViewType>>
 }
 
 function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
@@ -249,6 +247,16 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                     History
                 </Typography>
             )}
+
+            <FormControl>
+                <RadioGroup className={'flex flex-row w-[300px]'} name="controlled-radio-buttons-group"
+                            value={props.typeViewValue}
+                            onChange={(val) => props.handleChangeTypeViewChange(val.target.value as unknown as ViewType)}>
+                    <FormControlLabel value={ViewType.Device} control={<Radio/>} label="Device"/>
+                    <FormControlLabel value={ViewType.Sensor} control={<Radio/>} label="Sensor"/>
+                </RadioGroup>
+            </FormControl>
+
             {numSelected > 0 ? (
                 <Tooltip title="Delete">
                     <IconButton>
@@ -270,47 +278,112 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 const History = () => {
 
     const [order, setOrder] = useState<Order>('asc');
-    const [orderBy, setOrderBy] = useState<keyof Data>('calories');
-    const [selected, setSelected] = useState<readonly string[]>([]);
+    const [orderBy, setOrderBy] = useState<keyof (SensorFilterResponse & DeviceFilterResponse)>('time');
     const [page, setPage] = useState(0);
     const [dense, setDense] = useState(false);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const handleRequestSort = (
+    const [typeView, setTypeView] = useState<ViewType>(ViewType.Sensor);
+    const [headerSensor, setHeaderSensor] = useState<HeadCell<SensorFilterResponse>[]>([]);
+    const [sensor, setSensor] = useState<SensorFilterResponse[]>([]);
+
+    const [headerDevice, setHeaderDevice] = useState<HeadCell<DeviceFilterResponse>[]>([]);
+    const [device, setDevice] = useState<DeviceFilterResponse[]>([]);
+
+    const [deviceSelected, setDeviceSelected] = useState<readonly string[]>([]);
+    const [sensorSelected, setSensorSelected] = useState<readonly string[]>([]);
+
+
+
+    useEffect(() => {
+        if(typeView == ViewType.Sensor){
+            setHeaderSensor(headCellSensor);
+            setHeaderDevice([]);
+            // getHistorySensorByFilter({
+            //     from: new Date('2023/07/01'),
+            // }).then(result => {
+            //     console.log(result)
+            // })
+        }
+        if(typeView == ViewType.Device){
+            setHeaderDevice(headCellDevice);
+            setHeaderSensor([]);
+        }
+    }, [typeView])
+
+    const handleRequestSort = <T,>(
         event: React.MouseEvent<unknown>,
-        property: keyof Data,
+        property: keyof T,
     ) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
     };
 
-    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            const newSelected = rows.map((n) => n.name);
-            setSelected(newSelected);
-            return;
+    const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>, type: ViewType) => {
+        switch (type) {
+            case ViewType.Sensor:{
+                if (event.target.checked) {
+                    const newSelected = sensor.map((n) => n.id);
+                    setSensorSelected(newSelected);
+                    return;
+                }
+                setSensorSelected([]);
+                break;
+            }
+            case ViewType.Device:{
+                if (event.target.checked) {
+                    const newSelected = device.map((n) => n.id);
+                    setDeviceSelected(newSelected);
+                    return;
+                }
+                setDeviceSelected([]);
+                break;
+            }
         }
-        setSelected([]);
+
+
     };
 
-    const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-        const selectedIndex = selected.indexOf(name);
-        let newSelected: readonly string[] = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            );
-        }
-        setSelected(newSelected);
+    const handleClick = (event: React.MouseEvent<unknown>, id: string, type: ViewType) => {
+       switch (type) {
+           case ViewType.Sensor:{
+               const selectedIndex = sensorSelected.indexOf(id);
+               let newSelected: readonly string[] = [];
+               if (selectedIndex === -1) {
+                   newSelected = newSelected.concat(sensorSelected, id);
+               } else if (selectedIndex === 0) {
+                   newSelected = newSelected.concat(sensorSelected.slice(1));
+               } else if (selectedIndex === sensorSelected.length - 1) {
+                   newSelected = newSelected.concat(sensorSelected.slice(0, -1));
+               } else if (selectedIndex > 0) {
+                   newSelected = newSelected.concat(
+                       sensorSelected.slice(0, selectedIndex),
+                       sensorSelected.slice(selectedIndex + 1),
+                   );
+               }
+               setSensorSelected(newSelected);
+               break;
+           }
+           case ViewType.Device:{
+               const selectedIndex = deviceSelected.indexOf(id);
+               let newSelected: readonly string[] = [];
+               if (selectedIndex === -1) {
+                   newSelected = newSelected.concat(deviceSelected, id);
+               } else if (selectedIndex === 0) {
+                   newSelected = newSelected.concat(deviceSelected.slice(1));
+               } else if (selectedIndex === deviceSelected.length - 1) {
+                   newSelected = newSelected.concat(deviceSelected.slice(0, -1));
+               } else if (selectedIndex > 0) {
+                   newSelected = newSelected.concat(
+                       deviceSelected.slice(0, selectedIndex),
+                       deviceSelected.slice(selectedIndex + 1),
+                   );
+               }
+               setDeviceSelected(newSelected);
+               break;
+           }
+       }
     };
 
     const handleChangePage = (event: unknown, newPage: number) => {
@@ -326,96 +399,200 @@ const History = () => {
         setDense(event.target.checked);
     };
 
-    const isSelected = (name: string) => selected.indexOf(name) !== -1;
+    const isSelected = (id: string, type: ViewType) => {
+        switch (type){
+            case ViewType.Sensor:
+                return sensorSelected.indexOf(id) !== -1;
+            case ViewType.Device:
+                return  deviceSelected.indexOf(id) !== -1;
+            default:
+                return false;
+        }
+    }
 
-    const emptyRows =
-        page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    const emptyRows = (type: ViewType) => page > 0 ? Math.max(0, (1 + page) * rowsPerPage - (type === ViewType.Sensor ? sensor.length : device.length)) : 0;
 
-    const visibleRows = React.useMemo(
+    const visibleRowsSensor = React.useMemo(
         () =>
-            stableSort(rows, getComparator(order, orderBy)).slice(
+            stableSort<SensorFilterResponse>(sensor, getComparator(order, orderBy as keyof SensorFilterResponse)).slice(
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [order, orderBy, page, rowsPerPage],
+        [typeView, order, orderBy, page, rowsPerPage],
     );
+
+    const visibleRowsDevice = React.useMemo(
+        () =>
+            stableSort<DeviceFilterResponse>(device, getComparator(order, orderBy as keyof DeviceFilterResponse)).slice(
+                page * rowsPerPage,
+                page * rowsPerPage + rowsPerPage,
+            ),
+        [typeView, order, orderBy, page, rowsPerPage],
+    );
+
+
 
     return (
         <StyledEngineProvider injectFirst>
             <Box sx={{width: '90%'}} className={'mx-auto mt-4'}>
                 <Paper sx={{width: '100%', mb: 2}}>
-                    <EnhancedTableToolbar numSelected={selected.length}/>
-                    <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
-                        <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
-                            <EnhancedTableHead
-                                numSelected={selected.length}
-                                order={order}
-                                orderBy={orderBy}
-                                onSelectAllClick={handleSelectAllClick}
-                                onRequestSort={handleRequestSort}
-                                rowCount={rows.length}
-                            />
-                            <TableBody>
-                                {visibleRows.map((row, index) => {
-                                    const isItemSelected = isSelected(row.name);
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-                                    return (
-                                        <TableRow
-                                            hover
-                                            onClick={(event) => handleClick(event, row.name)}
-                                            role="checkbox"
-                                            aria-checked={isItemSelected}
-                                            tabIndex={-1}
-                                            key={row.name}
-                                            selected={isItemSelected}
-                                            sx={{cursor: 'pointer'}}
-                                        >
-                                            <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    color="error"
-                                                    checked={isItemSelected}
-                                                    inputProps={{
-                                                        'aria-labelledby': labelId,
+                    <EnhancedTableToolbar typeViewValue={typeView} handleChangeTypeViewChange={setTypeView}
+                                          numSelected={typeView === ViewType.Sensor ? sensorSelected.length : deviceSelected.length }/>
+                    {
+                        typeView == ViewType.Sensor ? (
+                            <>
+                                <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
+                                    <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
+                                        {
+                                            <EnhancedTableHead
+                                            numSelected={sensorSelected.length}
+                                            order={order}
+                                            orderBy={orderBy}
+                                            onSelectAllClick={evt => handleSelectAllClick(evt, typeView)}
+                                            onRequestSort={(evt, property) => handleRequestSort<SensorFilterResponse>(evt, property)}
+                                            rowCount={sensor.length}
+                                            data={headerSensor}
+                                        />}
+                                        <TableBody>
+                                            {visibleRowsSensor.map((row, index) => {
+                                                const isItemSelected = isSelected(row.id, typeView);
+                                                const labelId = `enhanced-table-checkbox-${index}`;
+                                                return (
+                                                    <TableRow
+                                                        hover
+                                                        onClick={(event) => handleClick(event, row.id, typeView)}
+                                                        role="checkbox"
+                                                        aria-checked={isItemSelected}
+                                                        tabIndex={-1}
+                                                        key={row.id}
+                                                        selected={isItemSelected}
+                                                        sx={{cursor: 'pointer'}}
+                                                    >
+                                                        <TableCell padding="checkbox">
+                                                            <Checkbox
+                                                                color="error"
+                                                                checked={isItemSelected}
+                                                                inputProps={{
+                                                                    'aria-labelledby': labelId,
+                                                                }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell
+                                                            component="th"
+                                                            id={labelId}
+                                                            scope="row"
+                                                            padding="none"
+                                                        >
+                                                            {`${row.time}`}
+                                                        </TableCell>
+                                                        <TableCell align="right">{row.light}</TableCell>
+                                                        <TableCell align="right">{row.soil}</TableCell>
+                                                        <TableCell align="right">{row.temperature}</TableCell>
+                                                        <TableCell align="right">{row.rain}</TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                            {emptyRows(typeView) > 0 && (
+                                                <TableRow
+                                                    style={{
+                                                        height: (dense ? 33 : 53) * emptyRows(typeView),
                                                     }}
-                                                />
-                                            </TableCell>
-                                            <TableCell
-                                                component="th"
-                                                id={labelId}
-                                                scope="row"
-                                                padding="none"
-                                            >
-                                                {row.name}
-                                            </TableCell>
-                                            <TableCell align="right">{row.calories}</TableCell>
-                                            <TableCell align="right">{row.fat}</TableCell>
-                                            <TableCell align="right">{row.carbs}</TableCell>
-                                            <TableCell align="right">{row.protein}</TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                                {emptyRows > 0 && (
-                                    <TableRow
-                                        style={{
-                                            height: (dense ? 33 : 53) * emptyRows,
-                                        }}
-                                    >
-                                        <TableCell colSpan={6}/>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <TablePagination
-                        labelRowsPerPage={'rows/page'}
-                        rowsPerPageOptions={[10, 25, 100]}
-                        component="div"
-                        count={rows.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
+                                                >
+                                                    <TableCell colSpan={6}/>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                                <TablePagination
+                                    labelRowsPerPage={'rows/page'}
+                                    rowsPerPageOptions={[10, 25, 100]}
+                                    component="div"
+                                    count={sensor.length}
+                                    rowsPerPage={rowsPerPage}
+                                    page={page}
+                                    onPageChange={handleChangePage}
+                                    onRowsPerPageChange={handleChangeRowsPerPage}
+                                />
+                            </>
+                        )
+                            :(
+                             <>
+                                 <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
+                                     <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
+                                         <EnhancedTableHead
+                                             numSelected={deviceSelected.length}
+                                             order={order}
+                                             orderBy={orderBy}
+                                             onSelectAllClick={evt => handleSelectAllClick(evt, typeView)}
+                                             onRequestSort={handleRequestSort}
+                                             rowCount={device.length}
+                                             data={headCellDevice}
+                                         />
+                                         <TableBody>
+                                             {visibleRowsDevice.map((row, index) => {
+                                                 const isItemSelected = isSelected(row.id, typeView);
+                                                 const labelId = `enhanced-table-checkbox-${index}`;
+                                                 return (
+                                                     <TableRow
+                                                         hover
+                                                         onClick={(event) => handleClick(event, row.id, typeView)}
+                                                         role="checkbox"
+                                                         aria-checked={isItemSelected}
+                                                         tabIndex={-1}
+                                                         key={row.id}
+                                                         selected={isItemSelected}
+                                                         sx={{cursor: 'pointer'}}
+                                                     >
+                                                         <TableCell padding="checkbox">
+                                                             <Checkbox
+                                                                 color="error"
+                                                                 checked={isItemSelected}
+                                                                 inputProps={{
+                                                                     'aria-labelledby': labelId,
+                                                                 }}
+                                                             />
+                                                         </TableCell>
+                                                         <TableCell
+                                                             component="th"
+                                                             id={labelId}
+                                                             scope="row"
+                                                             padding="none"
+                                                         >
+                                                             {`${row.time}`}
+                                                         </TableCell>
+                                                         <TableCell align="right">{row.fan}</TableCell>
+                                                         <TableCell align="right">{row.light}</TableCell>
+                                                         <TableCell align="right">{row.pump}</TableCell>
+                                                         <TableCell align="right">{row.motor}</TableCell>
+                                                     </TableRow>
+                                                 );
+                                             })}
+                                             {emptyRows(typeView) > 0 && (
+                                                 <TableRow
+                                                     style={{
+                                                         height: (dense ? 33 : 53) * emptyRows(typeView),
+                                                     }}
+                                                 >
+                                                     <TableCell colSpan={6}/>
+                                                 </TableRow>
+                                             )}
+                                         </TableBody>
+                                     </Table>
+                                 </TableContainer>
+                                 <TablePagination
+                                     labelRowsPerPage={'rows/page'}
+                                     rowsPerPageOptions={[10, 25, 100]}
+                                     component="div"
+                                     count={device.length}
+                                     rowsPerPage={rowsPerPage}
+                                     page={page}
+                                     onPageChange={handleChangePage}
+                                     onRowsPerPageChange={handleChangeRowsPerPage}
+                                 />
+                             </>
+                            )
+                    }
                 </Paper>
             </Box>
         </StyledEngineProvider>

@@ -2,12 +2,14 @@ import {
     IonButton,
     IonButtons,
     IonContent,
-    IonFooter, IonHeader,
+    IonFooter,
+    IonHeader,
     IonPage,
     IonRouterOutlet,
     IonText,
     IonTitle,
-    IonToolbar, useIonRouter
+    IonToolbar,
+    useIonRouter
 } from "@ionic/react";
 import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
@@ -26,7 +28,6 @@ const SystemControl = () => {
             return;
         }
         setBack(false);
-        console.log(router)
     }, [router]);
 
     return <IonPage>
