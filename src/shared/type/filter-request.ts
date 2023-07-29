@@ -17,6 +17,15 @@ export type SensorFilterRequest = {
     pageRequest?: PageRequest
 }
 
+export type DeviceFilterRequest = {
+    from: Date;
+    to?: Date;
+    keyword?: string;
+    max?: number;
+    min?: number;
+    pageRequest?: PageRequest
+}
+
 export type SensorFilterResponse = SensorHistory & {
     id: string;
     time: Date;

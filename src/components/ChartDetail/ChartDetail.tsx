@@ -142,10 +142,6 @@ export const ChartDetail = () => {
             orderBy("time", "desc"), limit(10));
 
         getDocs(q).then(snapshot => {
-            console.log(snapshot.docs.map(x => ({
-                ...x.data(),
-                id: x.id
-            })));
             const dataResponse = snapshot.docs.map(x => x.data() as SensorHistory);
             const data: ChartDetailData[] = dataResponse.map(x => ({
                 data: x[getPathByType()],

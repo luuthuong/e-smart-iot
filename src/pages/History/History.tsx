@@ -18,6 +18,8 @@ import {alpha, Box, FormControl, FormControlLabel, Radio, RadioGroup, TableSortL
 import {IonIcon} from "@ionic/react";
 import {filterOutline, trashOutline} from "ionicons/icons";
 import {DeviceFilterResponse, SensorFilterResponse} from "../../shared";
+import {getHistoryDeviceByFilter, getHistorySensorByFilter} from "../../services";
+import moment from "moment/moment";
 
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
@@ -137,6 +139,12 @@ const headCellDevice: HeadCell<DeviceFilterResponse>[] = [
         numeric: true,
         disablePadding: false,
         label: 'Motor',
+    },
+    {
+        id: 'light',
+        numeric: true,
+        disablePadding: false,
+        label: 'Light',
     },
 ];
 
@@ -296,16 +304,20 @@ const History = () => {
     useEffect(() => {
         if(typeView == ViewType.Sensor){
             setHeaderSensor(headCellSensor);
-            setHeaderDevice([]);
-            // getHistorySensorByFilter({
-            //     from: new Date('2023/07/01'),
-            // }).then(result => {
-            //     console.log(result)
-            // })
+            getHistorySensorByFilter({
+                from: new Date('2023/07/25'),
+            }).then(result => {
+                setSensor(result)
+            })
         }
         if(typeView == ViewType.Device){
             setHeaderDevice(headCellDevice);
-            setHeaderSensor([]);
+
+            getHistoryDeviceByFilter({
+                from: new Date('2023/07/25'),
+            }).then(result =>{
+                setDevice(result);
+            })
         }
     }, [typeView])
 
@@ -416,7 +428,7 @@ const History = () => {
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [typeView, order, orderBy, page, rowsPerPage],
+        [typeView,sensor, order, orderBy, page, rowsPerPage],
     );
 
     const visibleRowsDevice = React.useMemo(
@@ -425,7 +437,7 @@ const History = () => {
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [typeView, order, orderBy, page, rowsPerPage],
+        [typeView, device, order, orderBy, page, rowsPerPage],
     );
 
 
@@ -481,12 +493,12 @@ const History = () => {
                                                             scope="row"
                                                             padding="none"
                                                         >
-                                                            {`${row.time}`}
+                                                            { moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
                                                         </TableCell>
                                                         <TableCell align="right">{row.light}</TableCell>
                                                         <TableCell align="right">{row.soil}</TableCell>
                                                         <TableCell align="right">{row.temperature}</TableCell>
-                                                        <TableCell align="right">{row.rain}</TableCell>
+                                                        <TableCell align="right">{row.rain ? 'Rain' : 'Not Rain'}</TableCell>
                                                     </TableRow>
                                                 );
                                             })}
@@ -557,12 +569,12 @@ const History = () => {
                                                              scope="row"
                                                              padding="none"
                                                          >
-                                                             {`${row.time}`}
+                                                             { moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
                                                          </TableCell>
-                                                         <TableCell align="right">{row.fan}</TableCell>
-                                                         <TableCell align="right">{row.light}</TableCell>
-                                                         <TableCell align="right">{row.pump}</TableCell>
-                                                         <TableCell align="right">{row.motor}</TableCell>
+                                                         <TableCell align="right">{row.fan ? 'ON' : 'OFF'}</TableCell>
+                                                         <TableCell align="right">{row.light  ? 'ON' : 'OFF'}</TableCell>
+                                                         <TableCell align="right">{row.pump  ? 'ON' : 'OFF'}</TableCell>
+                                                         <TableCell align="right">{row.motor  ? 'ON' : 'OFF'}</TableCell>
                                                      </TableRow>
                                                  );
                                              })}
