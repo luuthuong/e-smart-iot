@@ -233,6 +233,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                         alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
                 }),
             }}
+            className={'flex justify-between'}
         >
             {numSelected > 0 ? (
                 <Typography
@@ -245,7 +246,7 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             ) : (
                 <Typography
-                    sx={{flex: '1 1 100%'}}
+                    // sx={{flex: '1 1 50%'}}
                     variant="h6"
                     id="tableTitle"
                     component="div"
@@ -255,11 +256,11 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             )}
 
             <FormControl>
-                <RadioGroup className={'flex flex-row w-[300px]'} name="controlled-radio-buttons-group"
+                <RadioGroup className={'flex flex-wrap flex-row'} name="controlled-radio-buttons-group"
                             value={props.typeViewValue}
                             onChange={(val) => props.handleChangeTypeViewChange(val.target.value as unknown as ViewType)}>
-                    <FormControlLabel value={ViewType.Device} control={<Radio/>} label="Device"/>
-                    <FormControlLabel value={ViewType.Sensor} control={<Radio/>} label="Sensor"/>
+                    <FormControlLabel  value={ViewType.Device} control={<Radio/>} label="Device"/>
+                    <FormControlLabel  value={ViewType.Sensor} control={<Radio/>} label="Sensor"/>
                 </RadioGroup>
             </FormControl>
 
@@ -270,11 +271,12 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                     </IconButton>
                 </Tooltip>
             ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-                        <IonIcon icon={filterOutline}></IonIcon>
-                    </IconButton>
-                </Tooltip>
+                // <Tooltip title="Filter list">
+                //     <IconButton>
+                //         <IonIcon icon={filterOutline}></IonIcon>
+                //     </IconButton>
+                // </Tooltip>
+                <></>
             )}
         </Toolbar>
     );

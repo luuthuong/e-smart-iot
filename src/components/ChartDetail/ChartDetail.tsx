@@ -232,7 +232,7 @@ export const ChartDetail = () => {
                         <IonCardHeader>
 
                             <div className={'flex ion-justify-content-between ion-align-items-center'}>
-                                <div className={'flex items-center gap-x-1'}>
+                                <div className={'flex items-center flex-wrap gap-x-1'}>
                                     <Link to={"/system"}>
                                         <IonChip color={"light"} className={"w-fit flex justify-center"}>
                                             <IonIcon color={"primary"} icon={arrowBackOutline}></IonIcon>

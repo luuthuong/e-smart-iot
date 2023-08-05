@@ -71,8 +71,7 @@ export const ControlPanel = () => {
                                         <IonToggle ref={x => toggleRefs.current[2] = x}  value={`${controller}/motor`} onIonChange={onTriggerDevice} className={'mt-1'} color={'medium'} enableOnOffLabels={true}></IonToggle>
                                     </IonCol>
                                 </IonRow>
-                                <IonItemDivider></IonItemDivider>
-                                <IonRow>
+                                <IonRow className={'mt-4'}>
                                     <IonCol size={'auto'} className={'mx-auto'}>
                                         <IonToggle ref={x => toggleRefs.current[3] = x} value={settingMode} onIonChange={onTriggerDevice} color={'dark'} >
                                             <IonLabel className={'w-[50px] block font-medium'}>{textMode}</IonLabel>
