@@ -8,7 +8,6 @@ class Control
 private:
     Database db;
     void connectFirebase();
-    void initPinMode();
     void initPid();
     void initDisplay();
     void autoMode();

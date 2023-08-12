@@ -21,8 +21,10 @@
 #define PIN_EN_MOTOR 15
 #define PIN_TURN_RIGHT 26
 #define PIN_TURN_LEFT 25
+
 #define PIN_LIMIT_LEFT 0
 #define PIN_LIMIT_RIGHT 2
+
 #define PIN_LAMP 13
 
 #define MAX_SPEED 255
@@ -226,9 +228,7 @@ void Control::setup()
     this->initPinMode();
 }
 
-void Control::initPinMode()
-{
-}
+
 void Control::connectFirebase()
 {
     this->db.connectFirebase();
@@ -279,7 +279,11 @@ void Control::syncDb()
 
 void Control::mannualMode()
 {
+
+
 }
+
+
 // direct = 0 LEFT, direct =  1 RIGHT
 void Control::motorControl(int speed, int direct)
 {
