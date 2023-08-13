@@ -4,7 +4,7 @@ import {
     IonContent,
     IonFooter,
     IonHeader,
-    IonPage,
+    IonPage, IonRouterLink,
     IonRouterOutlet,
     IonText,
     IonTitle,
@@ -15,7 +15,6 @@ import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
 import {Redirect, Route} from "react-router";
 import {Logo} from "../../data/svg-control";
-import {Link} from "react-router-dom";
 import History from "../History/History";
 
 const SystemControl = () => {
@@ -46,15 +45,15 @@ const SystemControl = () => {
                         Report
                     </IonButton>
 
-                    <Link onClick={evt => evt.stopPropagation()} to={back ? "/system" : "/history"}>
+                    <IonRouterLink onClick={evt => evt.stopPropagation()}  routerLink={back ? "/system" : "/history"}>
                         <IonButton color={back ? "dark" :"warning"} fill={"solid"}>
                             {back ? 'Back' : 'History'}
                         </IonButton>
-                    </Link>
+                    </IonRouterLink>
                     <IonButton color={"medium"} fill={"solid"}>
-                        <Link to={"/sign-in"}>
+                        <IonRouterLink routerLink={"/sign-in"}>
                             Login
-                        </Link>
+                        </IonRouterLink>
                     </IonButton>
                 </IonButtons>
             </IonToolbar>

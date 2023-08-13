@@ -1,4 +1,3 @@
-
 export type SeriesOption = {
     name: string;
     data: (string | number)[]
@@ -19,29 +18,31 @@ export type ChartLimit = {
     low?: number;
 }
 
+export type ChartType = | 'line'
+    | 'area'
+    | 'bar'
+    | 'pie'
+    | 'donut'
+    | 'radialBar'
+    | 'scatter'
+    | 'bubble'
+    | 'heatmap'
+    | 'candlestick'
+    | 'boxPlot'
+    | 'radar'
+    | 'polarArea'
+    | 'rangeBar'
+    | 'rangeArea'
+    | 'treemap';
+
 export type ChartConfig = {
     formatter?(val: number): string;
-    value?: (string| number)[];
+    value?: (string | number)[];
     minValue?: number;
     maxValue?: number;
     label?: string;
-    xAxisData?: (string| number)[];
+    xAxisData?: (string | number)[];
     seriesOption?: SeriesOption[],
-    type?:
-        | 'line'
-        | 'area'
-        | 'bar'
-        | 'pie'
-        | 'donut'
-        | 'radialBar'
-        | 'scatter'
-        | 'bubble'
-        | 'heatmap'
-        | 'candlestick'
-        | 'boxPlot'
-        | 'radar'
-        | 'polarArea'
-        | 'rangeBar'
-        | 'rangeArea'
-        | 'treemap'
+    type?: ChartType
 }
+

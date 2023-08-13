@@ -8,11 +8,11 @@ import {
     IonDatetime,
     IonDatetimeButton,
     IonGrid,
-    IonIcon,
+    IonIcon, IonItem,
     IonList,
     IonModal,
     IonRefresher,
-    IonRefresherContent,
+    IonRefresherContent, IonRouterLink,
     IonRow,
     IonSelect,
     IonSelectOption, IonSkeletonText,
@@ -23,7 +23,6 @@ import {
 import {arrowBackOutline} from "ionicons/icons";
 import Chart, * as ReactApexChartProps from "react-apexcharts";
 import {ChartTypeEnum, initChartConfig} from "../../shared";
-import {Link, useHistory, useParams} from "react-router-dom";
 import {ChartConstant} from "../../shared/constant";
 import {IonSelectCustomEvent} from "@ionic/core/dist/types/components";
 import {onValue, ref} from "firebase/database";
@@ -43,8 +42,6 @@ export const ChartDetail = () => {
     const [config, setConfig] = useState<ReactApexChartProps.Props | null>(null);
     const [label, setLabel] = useState("");
     const [option, setOption] = useState<ChartTypeEnum>();
-    const router = useHistory();
-    const params = useParams() as { id: string };
 
     const [realtimeMode, setRealtimeMode] = useState(true);
 
@@ -53,17 +50,28 @@ export const ChartDetail = () => {
 
     const [loading, setLoading] = useState(true);
 
+    const getParams = () =>{
+        const path = window.location.pathname;
+        const parts = path.split('/');
+        const index = parts.indexOf('system') + 1;
+        if (index > 0 && index < parts.length) {
+            return parts[index+1]
+        }
+        return undefined;
+    }
 
 
     useEffect(() => {
-        if (!params?.id)
+        const param = getParams();
+        if (!param)
             return;
-        setLabel(ChartConstant[+params.id as ChartTypeEnum]);
-        setOption(+params.id as ChartTypeEnum);
+        setLabel(ChartConstant[+param as ChartTypeEnum]);
+        setOption(+param as ChartTypeEnum);
     }, []);
 
     const getPathByType = (): 'light' | 'soil' | 'temperature' => {
-        switch (+params.id as ChartTypeEnum) {
+        const param = getParams() as unknown as ChartTypeEnum;
+        switch (param) {
             case ChartTypeEnum.Light:
                 return 'light'
             case ChartTypeEnum.Temperature:
@@ -176,7 +184,8 @@ export const ChartDetail = () => {
         };
 
     const onOptionChange = (e: IonSelectCustomEvent<SelectChangeEventDetail<ChartTypeEnum>>) => {
-        router.push(`/system/chart/${e.detail.value}`);
+        const newPath = window.location.pathname.replace(/\/\d+$/, `/${e.detail.value}`);
+        window.history.pushState({}, '', newPath);
         setOption(e.detail.value);
         setLabel(ChartConstant[e.detail.value as ChartTypeEnum])
     }
@@ -233,11 +242,11 @@ export const ChartDetail = () => {
 
                             <div className={'flex ion-justify-content-between ion-align-items-center'}>
                                 <div className={'flex items-center flex-wrap gap-x-1'}>
-                                    <Link to={"/system"}>
-                                        <IonChip color={"light"} className={"w-fit flex justify-center"}>
+                                    <IonChip color={"light"} className={"w-fit flex justify-center"}>
+                                        <IonRouterLink routerLink={"/system"}>
                                             <IonIcon color={"primary"} icon={arrowBackOutline}></IonIcon>
-                                        </IonChip>
-                                    </Link>
+                                        </IonRouterLink>
+                                    </IonChip>
                                     <IonList>
                                         <IonSelect aria-label={'option-chart'}
                                                    value={option}

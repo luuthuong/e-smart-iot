@@ -9,15 +9,15 @@ import {
     IonIcon,
     IonInput,
     IonItem,
-    IonLabel,
-    IonRow, IonSkeletonText,
+    IonLabel, IonNavLink, IonRouterLink,
+    IonRow,
+    IonSkeletonText,
     IonText,
     useIonToast,
 } from "@ionic/react";
 import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import Chart, * as ReactApexChartProps from "react-apexcharts";
 import {arrowForward, checkmarkOutline, createOutline} from 'ionicons/icons'
-import {Link} from "react-router-dom";
 import {ChartConfig, ChartTypeEnum, initChartConfig, Limit} from "../../shared";
 import {onValue, ref, set} from "firebase/database";
 import {database} from "../../database";
@@ -89,7 +89,7 @@ const UiChart = ({
             label: label,
             formatter: props.formatter,
             maxValue: maxValue,
-            minValue: props.minValue
+            minValue: props.minValue,
         }
         setConfig(initChartConfig(config));
         const limitPath = 'settings/limits';
@@ -99,10 +99,10 @@ const UiChart = ({
             setLimit(response);
         });
 
-        const timeout = setTimeout(() =>{
+        const timeout = setTimeout(() => {
             setLoading(false);
         }, 200);
-        return () =>{
+        return () => {
             clearTimeout(timeout);
         }
     }, [value]);
@@ -151,12 +151,12 @@ const UiChart = ({
                             }
                             <IonLabel className={'text-grey-700 text-lg text-grey-700'}>{title}</IonLabel>
                         </IonChip>
-                        <Link to={`/system/chart/${slug}`}>
-                            <IonChip color={"light"} slot={"end"}>
+                        <IonChip color={"light"} slot={"end"}>
+                            <IonRouterLink className={'item-navigate'} routerLink={`/system/chart/${slug}`}>
                                 <IonIcon color={'primary'} icon={arrowForward}>
                                 </IonIcon>
-                            </IonChip>
-                        </Link>
+                            </IonRouterLink>
+                        </IonChip>
                     </div>
                 </IonCardHeader>
                 {
