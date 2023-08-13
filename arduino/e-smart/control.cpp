@@ -225,7 +225,6 @@ void Control::initDisplay()
 void Control::setup()
 {
     this->connectFirebase();
-    this->initPinMode();
 }
 
 
