@@ -1,11 +1,10 @@
 import React from "react";
 import {IonRouterOutlet} from "@ionic/react";
-import {Redirect, Route} from "react-router";
+import {Route} from "react-router-dom";
 import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import SystemControl from "./pages/SystemControl/SystemControl";
 import {IonReactRouter} from "@ionic/react-router";
-import History from "./pages/History/History";
 
 
 const AppRouter = () =>

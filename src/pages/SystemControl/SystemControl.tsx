@@ -4,7 +4,8 @@ import {
     IonContent,
     IonFooter,
     IonHeader,
-    IonPage, IonRouterLink,
+    IonPage,
+    IonRouterLink,
     IonRouterOutlet,
     IonText,
     IonTitle,
@@ -13,9 +14,9 @@ import {
 } from "@ionic/react";
 import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
-import {Redirect, Route} from "react-router";
 import {Logo} from "../../data/svg-control";
 import History from "../History/History";
+import {Redirect, Route} from "react-router-dom";
 
 const SystemControl = () => {
     const [back, setBack] = useState(false);
