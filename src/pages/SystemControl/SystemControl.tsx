@@ -16,19 +16,29 @@ import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
 import {Logo} from "../../data/svg-control";
 import History from "../History/History";
-import {Redirect, Route} from "react-router-dom";
+import {Redirect, Route, useLocation} from "react-router-dom";
+import {Report} from "../Reporter/Report";
 
 const SystemControl = () => {
     const [back, setBack] = useState(false);
+    const [backAction, setBackAction] = useState<'/report' | '/history' | undefined>(undefined);
     const router = useIonRouter();
 
+    const location = useLocation();
+
+    const [actionHeader, setActionHeaders] = useState<('report' | 'history' | 'login')[]>([])
+
     useEffect(() => {
-        if (router.routeInfo.pathname === '/history') {
-            setBack(true);
-            return;
-        }
-        setBack(false);
-    }, [router]);
+        setBackAction(location.pathname as ('/report' | '/history' | undefined));
+    }, [location]);
+
+    // useEffect(() => {
+    //     if (['/history', '/report'].includes(router.routeInfo.pathname)) {
+    //         setBack(true);
+    //         return;
+    //     }
+    //     setBack(false);
+    // }, [router]);
 
     return <IonPage>
         <IonHeader>
@@ -42,13 +52,15 @@ const SystemControl = () => {
                     </IonText>
                 </IonTitle>
                 <IonButtons className={"ion-margin"} slot={"primary"}>
-                    <IonButton color={"dark"} fill={"solid"}>
-                        Report
-                    </IonButton>
+                    <IonRouterLink routerLink={ backAction === '/report' ? '/system': '/report'}>
+                        <IonButton color={"dark"} fill={"solid"}>
+                            {backAction === '/report' ? 'Back' : 'Report'}
+                        </IonButton>
+                    </IonRouterLink>
 
-                    <IonRouterLink onClick={evt => evt.stopPropagation()}  routerLink={back ? "/system" : "/history"}>
-                        <IonButton color={back ? "dark" :"warning"} fill={"solid"}>
-                            {back ? 'Back' : 'History'}
+                    <IonRouterLink onClick={evt => evt.stopPropagation()}  routerLink={backAction === '/history' ? "/system" : '/history'}>
+                        <IonButton color={backAction === '/history'  ? "dark" :"warning"} fill={"solid"}>
+                            {backAction === '/history' ? 'Back' : 'History'}
                         </IonButton>
                     </IonRouterLink>
                     <IonButton color={"medium"} fill={"solid"}>
@@ -61,7 +73,7 @@ const SystemControl = () => {
         </IonHeader>
 
         <IonContent>
-            <div className={'relative'}>
+            <div className={'relative'}  style={{height: 'calc(100% - 75px)'}}>
                 <IonRouterOutlet className={'relative'}>
                     <Route>
                         <Redirect to={'/system'}/>
@@ -72,12 +84,12 @@ const SystemControl = () => {
                     <Route path={'/history'} exact={true}>
                         <History/>
                     </Route>
+                    <Route component={Report} path={'/report'} exact />
                 </IonRouterOutlet>
             </div>
         </IonContent>
-
         <IonFooter>
-            Footer
+            {/*Footer*/}
         </IonFooter>
     </IonPage>
 }

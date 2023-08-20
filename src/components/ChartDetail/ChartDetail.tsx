@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {
+    IonButton,
     IonCard,
     IonCardContent,
     IonCardHeader,
@@ -15,12 +16,12 @@ import {
     IonRefresherContent, IonRouterLink,
     IonRow,
     IonSelect,
-    IonSelectOption, IonSkeletonText,
+    IonSelectOption, IonSkeletonText, IonText,
     IonToggle,
     RefresherEventDetail,
     SelectChangeEventDetail
 } from "@ionic/react";
-import {arrowBackOutline} from "ionicons/icons";
+import {arrowBackOutline, closeOutline} from "ionicons/icons";
 import Chart, * as ReactApexChartProps from "react-apexcharts";
 import {ChartTypeEnum, initChartConfig} from "../../shared";
 import {ChartConstant} from "../../shared/constant";
@@ -30,6 +31,8 @@ import {and, collection, getDocs, limit, orderBy, query, Timestamp, where} from 
 import {database, firestore, SensorHistory} from "../../database";
 import moment from "moment";
 import {OverlayEventDetail} from "@ionic/react/dist/types/components/react-component-lib/interfaces";
+import {DateRangeModal} from "../DateRangeModal";
+import {Range} from "react-date-range";
 
 
 type ChartDetailData = {
@@ -44,9 +47,7 @@ export const ChartDetail = () => {
     const [option, setOption] = useState<ChartTypeEnum>();
 
     const [realtimeMode, setRealtimeMode] = useState(true);
-
-    const dateFromRef = useRef<HTMLIonDatetimeElement | null>(null);
-    const dateToRef = useRef<HTMLIonDatetimeElement | null>(null);
+    const [range, setRange] = useState<Range[]>([])
 
     const [loading, setLoading] = useState(true);
 
@@ -190,38 +191,31 @@ export const ChartDetail = () => {
         setLabel(ChartConstant[e.detail.value as ChartTypeEnum])
     }
 
-    const onDatetimeModalDismiss = (ev: CustomEvent<OverlayEventDetail>) => {
-        const from = dateFromRef.current?.value as string;
-        const to = dateToRef.current?.value as string;
-        onFilterHistorySensor(from ? new Date(from) : undefined, to ? new Date(to) : undefined);
-    }
-
     return (
         <IonGrid>
             <IonRow>
                 <IonCol className={`mx-auto ${realtimeMode && 'hidden'}`} size={'10'} sizeMd={'4'} sizeLg={'6'}
                         sizeXl={'4'}>
                     <IonRow>
-                        <IonCol className={'flex gap-x-1 justify-center'} size={'12'} sizeMd={'12'} sizeLg={'6'}>
-                        <span
-                            className={'text-xl font-medium text-gray-800 flex items-center justify-center h-full w-[50px]'}>From</span>
-                            <IonModal onWillDismiss={onDatetimeModalDismiss} keepContentsMounted={true}>
-                                <IonDatetime ref={dateFromRef} presentation={'date'} id={'dateFrom'}></IonDatetime>
-                            </IonModal>
-                            <IonDatetimeButton datetime={'dateFrom'}></IonDatetimeButton>
-                        </IonCol>
-
-                        <IonCol className={'flex gap-x-1 mx-auto justify-center'} size={'12'} sizeMd={'12'}
-                                sizeLg={'6'}>
-                        <span
-                            className={'text-xl font-medium text-gray-800 flex items-center justify-center h-full w-[50px]'}>
-                            To
-                        </span>
-                            <IonDatetimeButton datetime={'dateTo'}></IonDatetimeButton>
-                            <IonModal onWillDismiss={onDatetimeModalDismiss} keepContentsMounted={true}>
-                                <IonDatetime presentation={'date'} ref={dateToRef} id="dateTo"></IonDatetime>
-                            </IonModal>
-                        </IonCol>
+                        <DateRangeModal confirm={(val) => {
+                            setRange(val);
+                            onFilterHistorySensor( val[0].startDate ? new Date(val[0].startDate) : undefined, val[0].endDate ? new Date(val[0].endDate) : undefined);
+                        }} />
+                        <div className={' ml-3 flex items-center'}>
+                            {
+                                range.length ? <>
+                                    <IonText>Range:</IonText>
+                                    <div>
+                                        <IonChip>{moment(range[0].startDate).format("DD/MM/yyyy")}</IonChip>
+                                        -
+                                        <IonChip>{moment(range[0].endDate).format("DD/MM/yyyy")}</IonChip>
+                                    </div>
+                                    <IonButton onClick={() => setRange([])} size={'small'} color={'light'}>
+                                        <IonIcon className={'flex justify-center'} icon={closeOutline}></IonIcon>
+                                    </IonButton>
+                                </>: <></>
+                            }
+                        </div>
                     </IonRow>
                 </IonCol>
             </IonRow>

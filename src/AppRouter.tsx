@@ -5,6 +5,7 @@ import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import SystemControl from "./pages/SystemControl/SystemControl";
 import {IonReactRouter} from "@ionic/react-router";
+import {Report} from "./pages/Reporter/Report";
 
 
 const AppRouter = () =>
@@ -18,6 +19,7 @@ const AppRouter = () =>
 
             <Route component={SystemControl} path="">
             </Route>
+
         </IonRouterOutlet>
     </IonReactRouter>
 export default AppRouter;

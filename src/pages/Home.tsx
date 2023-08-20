@@ -1,14 +1,14 @@
 import React, {useState} from 'react';
-import { Message, getMessages } from '../data/messages';
+import {getMessages, Message} from '../data/messages';
 import {
   IonContent,
   IonHeader,
-  IonList,
   IonPage,
   IonRefresher,
   IonRefresherContent,
   IonTitle,
-  IonToolbar, useIonViewWillEnter
+  IonToolbar,
+  useIonViewWillEnter
 } from '@ionic/react';
 import './Home.css';
 
