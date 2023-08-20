@@ -160,17 +160,27 @@ void limitChangeHandler(String path, String value, String valueType)
         updateLimitChange(&tempLimit, path, value, valueType, "TEMPERATURE");
 }
 
+void mannualModeWrite(String name, int pin, bool state){
+  Serial.printf("--------MANNUAL TRIGGER--------\n");
+  Serial.printf("STATE %s: %d \n", name, state);
+  digitalWrite(pin, state);
+  Serial.println("----------------------------");
+}
+
 void mannualControlChangeHandler(String path, String value)
 {
     path.remove(0, childPath[1].length() + 1);
     bool active = String(value) == "true";
     if (path.equals(LAMP))
-        digitalWrite(PIN_LAMP, active);
+      mannualModeWrite("LAMP", PIN_LAMP, active);
+
     if (path.equals(MOTOR))
-        digitalWrite(PIN_EN_MOTOR, active);
+      mannualModeWrite("MOTOR", PIN_EN_MOTOR, active);
+
     if (path.equals(PUMP))
-        digitalWrite(PIN_PUMP, active);
+      mannualModeWrite("PUMP", PIN_PUMP, active);
 }
+
 
 void modeChangeHandler(String path, String value)
 {
