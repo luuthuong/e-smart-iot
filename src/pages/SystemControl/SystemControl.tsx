@@ -10,14 +10,16 @@ import {
     IonText,
     IonTitle,
     IonToolbar,
-    useIonRouter
+    useIonRouter, useIonToast
 } from "@ionic/react";
 import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
 import {Logo} from "../../data/svg-control";
 import History from "../History/History";
-import {Redirect, Route, useLocation} from "react-router-dom";
+import {Redirect, Route, useHistory, useLocation} from "react-router-dom";
 import {Report} from "../Reporter/Report";
+import { onAuthStateChanged } from "firebase/auth";
+import {auth} from "../../database";
 
 const SystemControl = () => {
     const [back, setBack] = useState(false);
@@ -25,20 +27,34 @@ const SystemControl = () => {
     const router = useIonRouter();
 
     const location = useLocation();
+    const history = useHistory();
 
-    const [actionHeader, setActionHeaders] = useState<('report' | 'history' | 'login')[]>([])
+    const [actionHeader, setActionHeaders] = useState<('report' | 'history' | 'login')[]>([]);
+
+    const [present] = useIonToast();
+    const presentToast = (msg: string, color: string, position: 'top' | 'middle' | 'bottom' = 'bottom') => {
+        present({
+            message: msg,
+            duration: 2000,
+            position: position,
+            color: color
+        });
+    };
+
+    useEffect(() => {
+        onAuthStateChanged(auth, (usr) =>{
+            if(usr){
+                console.log(usr.uid)
+                return;
+            }
+            presentToast("unauthorize user. Login again!", "danger", "top")
+            history.push('/sign-in')
+        })
+    }, []);
 
     useEffect(() => {
         setBackAction(location.pathname as ('/report' | '/history' | undefined));
     }, [location]);
-
-    // useEffect(() => {
-    //     if (['/history', '/report'].includes(router.routeInfo.pathname)) {
-    //         setBack(true);
-    //         return;
-    //     }
-    //     setBack(false);
-    // }, [router]);
 
     return <IonPage>
         <IonHeader>
@@ -63,9 +79,9 @@ const SystemControl = () => {
                             {backAction === '/history' ? 'Back' : 'History'}
                         </IonButton>
                     </IonRouterLink>
-                    <IonButton color={"medium"} fill={"solid"}>
+                    <IonButton className={'text-white'} color={"warning"} fill={"solid"}>
                         <IonRouterLink routerLink={"/sign-in"}>
-                            Login
+                            Logout
                         </IonRouterLink>
                     </IonButton>
                 </IonButtons>

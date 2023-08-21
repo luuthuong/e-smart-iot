@@ -245,7 +245,6 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             ) : (
                 <Typography
-                    // sx={{flex: '1 1 50%'}}
                     variant="h6"
                     id="tableTitle"
                     component="div"
@@ -264,11 +263,12 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
             </FormControl>
 
             {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <IonIcon icon={trashOutline}></IonIcon>
-                    </IconButton>
-                </Tooltip>
+                // <Tooltip title="Delete">
+                //     <IconButton>
+                //         <IonIcon icon={trashOutline}></IonIcon>
+                //     </IconButton>
+                // </Tooltip>
+                <></>
             ) : (
                 // <Tooltip title="Filter list">
                 //     <IconButton>
