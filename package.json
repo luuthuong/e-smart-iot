@@ -19,7 +19,7 @@
     "lint": "eslint",
     "electron:dev": "electron .",
     "electron:pkg": "electron-packager . e-smart-iot --platform=win32 --arch=x64 --out .electron-build/ --overwrite",
-    "electron:installer": "electron-installer-windows --src .electron-build/e-smart-iot-win32-x64/ --dest .electron-build/installers/"
+    "electron:installer": "yarn electron:pkg && electron-installer-windows --src .electron-build/e-smart-iot-win32-x64/ --dest .electron-build/installers/"
   },
   "dependencies": {
     "-": "^0.0.1",
