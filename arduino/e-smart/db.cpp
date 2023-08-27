@@ -4,6 +4,7 @@
 #include <addons/RTDBHelper.h>
 #include "UUID.h"
 #include "util.h"
+
 #define API_KEY "AIzaSyDW2CyYpd_sjTfqt2a76ugJ_xZUJ-x76Sc"
 #define DATABASE_URL "https://e-smart-iot-default-rtdb.asia-southeast1.firebasedatabase.app/"
 #define USER_EMAIL "admin@gmail.com"
@@ -40,7 +41,7 @@ void Database::beginMultiPathStream(String parentPath)
 
 void Database::setString(String path, String value)
 {
-  Firebase.RTDB.setString(&this->fbdo, path, value);
+  Firebase.RTDB.setStringAsync(&this->fbdo, path, value);
 }
 
 String Database::getString(String path)
@@ -51,7 +52,7 @@ String Database::getString(String path)
 
 void Database::setInt(String path, int value)
 {
-  Firebase.RTDB.setInt(&this->fbdo, path, value);
+  Firebase.RTDB.setIntAsync(&this->fbdo, path, value);
 }
 
 int Database::getInt(String path)
@@ -62,7 +63,7 @@ int Database::getInt(String path)
 
 void Database::setBoolean(String path, bool value)
 {
-  Firebase.RTDB.setBool(&this->fbdo, path, value);
+  Firebase.RTDB.setBoolAsync(&this->fbdo, path, value);
 }
 
 bool Database::getBoolean(String path)
@@ -73,7 +74,7 @@ bool Database::getBoolean(String path)
 
 void Database::setFloat(String path, float value)
 {
-  Firebase.RTDB.setFloat(&this->fbdo, path, value);
+  Firebase.RTDB.setFloatAsync(&this->fbdo, path, value);
 }
 
 float Database::getFloat(String path)
@@ -85,6 +86,10 @@ float Database::getFloat(String path)
 String Database::getProjectId()
 {
   return FIREBASE_PROJECT_ID;
+}
+
+void Database::setJson(String path, FirebaseJson json){
+  Firebase.RTDB.updateNodeSilentAsync(&this->fbdo,path, &json);
 }
 
 void Database::commitDocument(String path, FirebaseJson json)

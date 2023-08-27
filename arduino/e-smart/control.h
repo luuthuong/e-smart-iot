@@ -11,7 +11,6 @@ private:
     void initPid();
     void initDisplay();
     void autoMode();
-    void mannualMode();
     void motorControl(int speed, int direct);
     void syncSensorLog();
     void syncDeviceLog();
@@ -22,5 +21,7 @@ public:
     void syncDb();
     void initStream();
     bool canExecute();
+    static void pidTask(void* parameters);
+    static void displayTask(void* parameters); 
 };
 #endif

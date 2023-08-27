@@ -26,6 +26,7 @@ public:
   void setFloat(String path, float value);
   float getFloat(String path);
   String getProjectId();
+  void setJson(String path, FirebaseJson json);
   void commitDocument(String path, FirebaseJson json);
 };
 #endif

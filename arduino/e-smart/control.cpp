@@ -11,6 +11,7 @@
 #include "ArduinoJson.h"
 #include "util.h"
 #include "limit.h"
+#include "device.h"
 
 #define ONE_WIRE_BUS 16
 #define PIN_SOIL 39
@@ -50,6 +51,8 @@ Limit tempLimit(30, 22);
 Limit lightLimit(800, 400);
 Limit soilLimit(70, 10);
 
+Device device(false, false, false);
+
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -62,278 +65,383 @@ int setpointTemp;
 PID pid(&pidInput, &pidOutput, &setPoint, consKp, consKi, consKd, DIRECT);
 
 const String parentPath = "/settings";
-const String childPath[3] = {"/limits", "/manualController", "/mode"};
+const String childPath[3] = { "/limits", "/manualController", "/mode" };
 
-bool getRainValue()
-{
-    return digitalRead(PIN_RAIN) == LOW;
+bool getRainValue() {
+  return digitalRead(PIN_RAIN) == LOW;
 }
 
-int getSoilValue()
-{
-    int value = analogRead(PIN_SOIL);
-    return (100 - map((value), 0, 4095, 0, 100));
+int getSoilValue() {
+  int value = analogRead(PIN_SOIL);
+  return (100 - map((value), 0, 4095, 0, 100));
 }
 
-float getLightValue()
-{
-    return lightMeter.readLightLevel();
+float getLightValue() {
+  float value = lightMeter.readLightLevel();
+  return value < 0 ? 0 : value;
 }
 
-float getTemperatureValue()
-{
-    return sensors.getTempCByIndex(0);
+float getTemperatureValue() {
+  float value = sensors.getTempCByIndex(0);
+  return value < 0 ? 0 : value;
 }
 
-void updateLimitChange(Limit *limit, String path, String value, String valueType, String displayName)
-{
-    if (valueType == "json")
-    {
-        StaticJsonDocument<100> jsondoc;
-        DeserializationError error = deserializeJson(jsondoc, value);
-        if (error)
-        {
-            Serial.println("deserialize json failed!");
-            Serial.println(error.f_str());
-            return;
-        }
-        limit->high = jsondoc[HIGH_LIMIT].as<float>();
-        limit->low = jsondoc[LOW_LIMIT].as<float>();
+void updateLimitChange(Limit* limit, String path, String value, String valueType, String displayName) {
+  if (valueType == "json") {
+    StaticJsonDocument<100> jsondoc;
+    DeserializationError error = deserializeJson(jsondoc, value);
+    if (error) {
+      Serial.println("deserialize json failed!");
+      Serial.println(error.f_str());
+      return;
     }
+    limit->high = jsondoc[HIGH_LIMIT].as<float>();
+    limit->low = jsondoc[LOW_LIMIT].as<float>();
+  }
 
-    if (path.equals(HIGH_LIMIT) && valueType == "int")
-        limit->high = value.toFloat();
+  if (path.equals(HIGH_LIMIT) && valueType == "int")
+    limit->high = value.toFloat();
 
-    if (path.equals(LOW_LIMIT) && valueType == "int")
-        limit->low = value.toFloat();
+  if (path.equals(LOW_LIMIT) && valueType == "int")
+    limit->low = value.toFloat();
 
-    Serial.printf("--------%s--------\n", displayName.c_str());
-    Serial.printf("HIGH: %f\nLOW: %f\n", limit->high, limit->low);
-    Serial.println("---------------------");
+  Serial.printf("--------%s--------\n", displayName.c_str());
+  Serial.printf("HIGH: %f\nLOW: %f\n", limit->high, limit->low);
+  Serial.println("---------------------");
 }
 
-void updateRootLimit(String path, String value)
-{
-    StaticJsonDocument<200> doc;
-    DeserializationError error = deserializeJson(doc, value.c_str());
-    if (error)
-    {
-        Serial.println("Deserialize json failed!");
-        Serial.println(error.f_str());
-        return;
-    }
+void updateRootLimit(String path, String value) {
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, value.c_str());
+  if (error) {
+    Serial.println("Deserialize json failed!");
+    Serial.println(error.f_str());
+    return;
+  }
 
-    lightLimit.high = doc[LIGHT][HIGH_LIMIT].as<float>();
-    lightLimit.low = doc[LIGHT][LOW_LIMIT].as<float>();
+  lightLimit.high = doc[LIGHT][HIGH_LIMIT].as<float>();
+  lightLimit.low = doc[LIGHT][LOW_LIMIT].as<float>();
 
-    soilLimit.high = doc[SOIL][HIGH_LIMIT].as<float>();
-    soilLimit.low = doc[SOIL][LOW_LIMIT].as<float>();
+  soilLimit.high = doc[SOIL][HIGH_LIMIT].as<float>();
+  soilLimit.low = doc[SOIL][LOW_LIMIT].as<float>();
 
-    tempLimit.high = doc[TEMP][HIGH_LIMIT].as<float>();
-    tempLimit.low = doc[TEMP][LOW_LIMIT].as<float>();
+  tempLimit.high = doc[TEMP][HIGH_LIMIT].as<float>();
+  tempLimit.low = doc[TEMP][LOW_LIMIT].as<float>();
 
-    Serial.println("--------LIMIT SETTING--------");
-    Serial.printf("LIGHT - HIGH: %f\tLOW: %f\n", lightLimit.high, lightLimit.low);
-    Serial.printf("SOIL -  HIGH: %f\tLOW: %f\n", soilLimit.high, soilLimit.low);
-    Serial.printf("TEMPERATURE - HIGH: %f\tLOW: %f\n", tempLimit.high, tempLimit.low);
-    Serial.println("----------------------------");
+  Serial.println("--------LIMIT SETTING--------");
+  Serial.printf("LIGHT - HIGH: %f\tLOW: %f\n", lightLimit.high, lightLimit.low);
+  Serial.printf("SOIL -  HIGH: %f\tLOW: %f\n", soilLimit.high, soilLimit.low);
+  Serial.printf("TEMPERATURE - HIGH: %f\tLOW: %f\n", tempLimit.high, tempLimit.low);
+  Serial.println("----------------------------");
 }
 
-void limitChangeHandler(String path, String value, String valueType)
-{
-    if (path.equals(childPath[0]))
-    {
-        updateRootLimit(path, value);
-        return;
-    }
-    path.remove(0, childPath[0].length() + 1);
-    String subPath = path.substring(0, path.indexOf('/'));
-    path.remove(0, subPath.length() + 1);
+void limitChangeHandler(String path, String value, String valueType) {
+  if (path.equals(childPath[0])) {
+    updateRootLimit(path, value);
+    return;
+  }
+  path.remove(0, childPath[0].length() + 1);
+  String subPath = path.substring(0, path.indexOf('/'));
+  path.remove(0, subPath.length() + 1);
 
-    if (subPath.equals(LIGHT))
-        updateLimitChange(&lightLimit, path, value, valueType, "LIGHT");
+  if (subPath.equals(LIGHT))
+    updateLimitChange(&lightLimit, path, value, valueType, "LIGHT");
 
-    if (subPath.equals(SOIL))
-        updateLimitChange(&soilLimit, path, value, valueType, "SOIL");
+  if (subPath.equals(SOIL))
+    updateLimitChange(&soilLimit, path, value, valueType, "SOIL");
 
-    if (subPath.equals(TEMP))
-        updateLimitChange(&tempLimit, path, value, valueType, "TEMPERATURE");
+  if (subPath.equals(TEMP))
+    updateLimitChange(&tempLimit, path, value, valueType, "TEMPERATURE");
 }
 
-void mannualModeWrite(String name, int pin, bool state){
+void mannualModeWrite(String name, int pin, bool state) {
   Serial.printf("--------MANNUAL TRIGGER--------\n");
   Serial.printf("STATE %s: %d \n", name, state);
   digitalWrite(pin, state);
   Serial.println("----------------------------");
 }
 
-void mannualControlChangeHandler(String path, String value)
-{
-    path.remove(0, childPath[1].length() + 1);
-    bool active = String(value) == "true";
-    if (path.equals(LAMP))
-      mannualModeWrite("LAMP", PIN_LAMP, active);
+void mannualControlChangeHandler(String path, String value) {
+  path.remove(0, childPath[1].length() + 1);
+  bool active = String(value) == "true";
+  if (path.equals(LAMP)){
+    device.lamp = active;
+  }
 
-    if (path.equals(MOTOR))
-      mannualModeWrite("MOTOR", PIN_EN_MOTOR, active);
+  if (path.equals(MOTOR)){
+    device.motor = active;
+    mannualModeWrite("MOTOR", PIN_EN_MOTOR, active);
+  }
 
-    if (path.equals(PUMP))
-      mannualModeWrite("PUMP", PIN_PUMP, active);
+  if (path.equals(PUMP)){
+    device.pump = active;
+    mannualModeWrite("PUMP", PIN_PUMP, active);
+  }
 }
 
 
-void modeChangeHandler(String path, String value)
-{
-    mode = String(value) == "true";
-    Serial.printf("Mode: %s\n", value);
+void modeChangeHandler(String path, String value) {
+  mode = String(value) == "true";
+  Serial.printf("Mode: %s\n", value);
 }
 
-void pathChangeHandler(String path, String value, String valueType)
-{
-    for (size_t i = 0; i < childPath->length(); i++)
-    {
-        switch (i)
-        {
-        case 0:
-            if (path.indexOf(childPath[i]) >= 0)
-                limitChangeHandler(path, value, valueType);
-            break;
-        case 1:
-            if (path.indexOf(childPath[i]) >= 0)
-                mannualControlChangeHandler(path, value);
-            break;
-        case 2:
-            if (path.indexOf(childPath[i]) >= 0)
-                modeChangeHandler(path, value);
-            break;
-        default:
-            break;
-        }
+void pathChangeHandler(String path, String value, String valueType) {
+  for (size_t i = 0; i < childPath->length(); i++) {
+    switch (i) {
+      case 0:
+        if (path.indexOf(childPath[i]) >= 0)
+          limitChangeHandler(path, value, valueType);
+        break;
+      case 1:
+        if (path.indexOf(childPath[i]) >= 0)
+          mannualControlChangeHandler(path, value);
+        break;
+      case 2:
+        if (path.indexOf(childPath[i]) >= 0)
+          modeChangeHandler(path, value);
+        break;
+      default:
+        break;
     }
+  }
 }
 
-void streamCallback(MultiPathStream stream)
-{
-    size_t childLenght = sizeof(childPath) / sizeof(childPath[0]);
-    for (size_t i = 0; i < childLenght; i++)
-    {
-        if (stream.get(childPath[i]))
-            pathChangeHandler(stream.dataPath.c_str(), stream.value.c_str(), stream.type.c_str());
-    }
+void streamCallback(MultiPathStream stream) {
+  size_t childLenght = sizeof(childPath) / sizeof(childPath[0]);
+  for (size_t i = 0; i < childLenght; i++) {
+    if (stream.get(childPath[i]))
+      pathChangeHandler(stream.dataPath.c_str(), stream.value.c_str(), stream.type.c_str());
+  }
 }
 
-void streamTimeoutCallback(bool timeout)
-{
-    if (timeout)
-        Serial.println("stream timed out, resuming...\n");
+void streamTimeoutCallback(bool timeout) {
+  if (timeout)
+    Serial.println("stream timed out, resuming...\n");
 }
 
-void Control::initDisplay()
-{
+void Control::initDisplay() {
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextSize(1.8);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 30);
+  display.println("-- E-SMART IOT --");
+  display.display();
 }
 
-void Control::setup()
-{
-    this->connectFirebase();
+void Control::setup() {
+  Wire.begin(5, 4);
+  lightMeter.begin();
+  sensors.begin();
+
+  pinMode(PIN_LIMIT_RIGHT, INPUT);
+  pinMode(PIN_LIMIT_LEFT, INPUT);
+  pinMode(PIN_PUMP, OUTPUT);
+  pinMode(PIN_TURN_LEFT, OUTPUT);
+  pinMode(PIN_TURN_RIGHT, OUTPUT);
+  pinMode(PIN_EN_MOTOR, OUTPUT);
+  pinMode(PIN_FAN, OUTPUT);
+
+  digitalWrite(PIN_TURN_LEFT, LOW);
+  digitalWrite(PIN_TURN_RIGHT, LOW);
+
+  this->initDisplay();
+  delay(2000);
+  display.clearDisplay();
+  display.println("Connecting to Firebase...");
+  display.display();
+  this->connectFirebase();
+  display.clearDisplay();
+  display.println("Firebase connected !");
+  display.display();
+  //***********PID**********//
+  setPoint = map(setpointTemp, 0, 100, 0, 4095);
+  pid.SetOutputLimits(0, 255);  // You can adjust value here
+  pid.SetSampleTime(10);        // time 0.01s
+  pid.SetMode(AUTOMATIC);
 }
 
 
-void Control::connectFirebase()
-{
-    this->db.connectFirebase();
-    this->db.beginMultiPathStream(parentPath);
-    Firebase.RTDB.setMultiPathStreamCallback(&this->db.stream, streamCallback, streamTimeoutCallback);
+void Control::connectFirebase() {
+  this->db.connectFirebase();
+  this->db.beginMultiPathStream(parentPath);
+  Firebase.RTDB.setMultiPathStreamCallback(&this->db.stream, streamCallback, streamTimeoutCallback);
 }
 
-void Control::run()
-{
-    this->syncDb();
-    this->autoMode();
-    this->mannualMode();
-    if (!this->db.stream.httpConnected())
-        Serial.println("Server was disconnected!");
+unsigned long prevMs = 0;
+void Control::run() {
+  //sync realtime
+  if (this->canExecute()) {
+    float soil = getSoilValue();
+    float temp = getTemperatureValue();
+    float light = getLightValue();
+    bool rain = getRainValue();
+    FirebaseJson jSensor;
+    jSensor.set("light", light);
+    jSensor.set("temperature", temp);
+    jSensor.set("soil", soil);
+    this->db.setJson("/actValues/sensors", jSensor);
+
+
+    FirebaseJson jMode;
+    jMode.set("mode", mode);
+    this->db.setJson("/actValues", jMode);
+
+
+    FirebaseJson jDevice;
+    jDevice.set("lamp", device.lamp);
+    jDevice.set("motor", (bool)digitalRead(PIN_EN_MOTOR));
+    jDevice.set("pump", (bool)digitalRead(PIN_PUMP));
+    this->db.setJson("/actValues/devices", jDevice);
+
+
+    prevMs = millis();
+  }
+
+  digitalWrite(PIN_PUMP, device.pump);
+  this->motorControl(160, (int)device.motor);
+
+  if (!this->db.stream.httpConnected()) {
+    display.println("Firebase disconnected!");
+    Serial.println("Server was disconnected!");
+  }
 }
 
-void Control::syncSensorLog()
-{
-    String currentDate = Util::getCurrentDate();
-    String currentTime = Util::getCurrentTime();
-    String documentPath = "History-Sensor/";
-    FirebaseJson content;
-    content.set("fields/light/integerValue", random(34,85));
-    content.set("fields/rain/booleanValue", false);
-    content.set("fields/soil/integerValue", random(12,90));
-    content.set("fields/temperature/integerValue", random(12,37));
-    this->db.commitDocument(documentPath, content);
+void Control::syncSensorLog() {
+  float soil = getSoilValue();
+  float temp = getTemperatureValue();
+  float light = getLightValue();
+  bool rain = getRainValue();
+
+  String currentDate = Util::getCurrentDate();
+  String currentTime = Util::getCurrentTime();
+  String documentPath = "History-Sensor/";
+  FirebaseJson content;
+  content.set("fields/light/integerValue", light);
+  content.set("fields/rain/booleanValue", rain);
+  content.set("fields/soil/integerValue", soil);
+  content.set("fields/temperature/integerValue", temp);
+  this->db.commitDocument(documentPath, content);
 }
 
-void Control::syncDeviceLog()
-{
-    String currentDate = Util::getCurrentDate();
-    String currentTime = Util::getCurrentTime();
-    String documentPath = "History-Device/";
-    FirebaseJson content;
-    content.set("fields/pump/booleanValue", true);
-    content.set("fields/light/booleanValue", true);
-    content.set("fields/motor/booleanValue", true);
-    content.set("fields/fan/booleanValue", true);
-    this->db.commitDocument(documentPath, content);
+void Control::syncDeviceLog() {
+  String currentDate = Util::getCurrentDate();
+  String currentTime = Util::getCurrentTime();
+  String documentPath = "History-Device/";
+  FirebaseJson content;
+  content.set("fields/pump/booleanValue", digitalRead(PIN_PUMP));
+  content.set("fields/light/booleanValue", device.lamp);
+  content.set("fields/motor/booleanValue", digitalRead(PIN_TURN_RIGHT));
+  content.set("fields/fan/booleanValue", digitalRead(PIN_FAN));
+  this->db.commitDocument(documentPath, content);
 }
 
-void Control::syncDb()
-{
-    this->syncDeviceLog();
-    this->syncSensorLog();
+void Control::syncDb() {
+  this->syncDeviceLog();
+  this->syncSensorLog();
 }
-
-void Control::mannualMode()
-{
-
-
-}
-
 
 // direct = 0 LEFT, direct =  1 RIGHT
-void Control::motorControl(int speed, int direct)
-{
-    int limitLeft = digitalRead(PIN_LIMIT_LEFT);
-    int limitRight = digitalRead(PIN_LIMIT_RIGHT);
-    speed = (speed, MIN_SPEED, MAX_SPEED);
-    analogWrite(PIN_EN_MOTOR, speed);
-    if ((direct == LEFT_DIRECT && limitLeft == LOW) || limitRight == LOW)
-    {
-        digitalWrite(PIN_TURN_LEFT, LOW);
-        digitalWrite(PIN_TURN_RIGHT, LOW);
-    }
-    switch (direct)
-    {
+void Control::motorControl(int speed, int direct) {
+  int limitLeft = digitalRead(PIN_LIMIT_LEFT);
+  int limitRight = digitalRead(PIN_LIMIT_RIGHT);
+  speed = (speed, MIN_SPEED, MAX_SPEED);
+  analogWrite(PIN_EN_MOTOR, speed);
+  if ((direct == LEFT_DIRECT && limitLeft == LOW) || (direct == RIGHT_DIRECT && limitRight == LOW)) {
+    digitalWrite(PIN_TURN_LEFT, LOW);
+    digitalWrite(PIN_TURN_RIGHT, LOW);
+  }
+  switch (direct) {
     case LEFT_DIRECT:
-        digitalWrite(PIN_TURN_RIGHT, LOW);
-        digitalWrite(PIN_TURN_LEFT, HIGH);
-        break;
+      digitalWrite(PIN_TURN_RIGHT, LOW);
+      digitalWrite(PIN_TURN_LEFT, HIGH);
+      break;
     case RIGHT_DIRECT:
-        digitalWrite(PIN_TURN_RIGHT, HIGH);
-        digitalWrite(PIN_TURN_LEFT, LOW);
-        break;
+      digitalWrite(PIN_TURN_RIGHT, HIGH);
+      digitalWrite(PIN_TURN_LEFT, LOW);
+      break;
     default:
-        return;
+      return;
+  }
+}
+
+void Control::initPid() {
+  setPoint = map(setpointTemp, 0, 100, 0, 4095);
+  pid.SetMode(1);
+}
+
+void Control::pidTask(void* parameters) {
+  for (;;) {
+    //***********PID************//
+    if (device.lamp) {
+      setPoint = map(setpointTemp, 0, 100, 0, 4095);
+      pid.Compute();
+      pidInput = map(getTemperatureValue(), 0, 100, 0, 4095);
+      Serial.printf("PID INPUT: %d - PID OUTPUT: %d \n", pidInput, pidOutput);
+      if (pidOutput > 0)
+        analogWrite(PIN_LAMP, pidOutput);
     }
+    else{
+      analogWrite(PIN_LAMP, 0);
+    }
+    vTaskDelay(10 / portTICK_PERIOD_MS);  // delay 10ms
+  }
 }
 
-void Control::autoMode()
-{
-    this->db.json.iteratorBegin();
+void Control::displayTask(void* parameters) {
+  for (;;) {
+    float soil = getSoilValue();
+    float temp = getTemperatureValue();
+    float light = getLightValue();
+    bool rain = getRainValue();
 
-    this->db.json.iteratorEnd();
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Time: ");
+    display.print(Util::getCurrentTime());
+
+    display.setCursor(90, 0);
+    display.print("Rain:");
+    display.print(rain ? 1 : 0);
+
+    display.setCursor(0, 15);
+    display.print("Soil:");
+    display.print((int)soil);
+    display.print("%");
+
+    display.setCursor(64, 15);
+    display.print("H/L: ");
+    display.print((int)soilLimit.high);
+    display.print("/");
+    display.print((int)soilLimit.low);
+
+    display.setCursor(0, 30);
+    display.print("Temp:");
+    display.print((int)temp);
+    display.print("C");
+
+    display.setCursor(64, 30);
+    display.print("H/L: ");
+    display.print((int)tempLimit.high);
+    display.print("/");
+    display.print((int)tempLimit.low);
+
+    display.setCursor(0, 45);
+    display.print("Light:");
+    display.print((int)light);
+    display.print("%");
+
+    display.setCursor(64, 45);
+    display.print("H/L: ");
+    display.print((int)lightLimit.high);
+    display.print("/");
+    display.print((int)lightLimit.low);
+
+    display.display();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);  // delay 10ms
+  }
 }
 
-void Control::initPid()
-{
-    setPoint = map(setpointTemp, 0, 100, 0, 4095);
-    pid.SetMode(1);
-}
-
-bool Control::canExecute()
-{
-    return this->db.canExecute();
+bool Control::canExecute() {
+  return this->db.canExecute();
 }
