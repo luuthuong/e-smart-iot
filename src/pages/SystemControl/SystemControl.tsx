@@ -10,25 +10,51 @@ import {
     IonText,
     IonTitle,
     IonToolbar,
-    useIonRouter
+    useIonRouter, useIonToast
 } from "@ionic/react";
 import React, {useEffect, useState} from "react";
 import {ChartDetail, ControlPanel, ListChart} from "../../components";
 import {Logo} from "../../data/svg-control";
 import History from "../History/History";
-import {Redirect, Route} from "react-router-dom";
+import {Redirect, Route, useHistory, useLocation} from "react-router-dom";
+import {Report} from "../Reporter/Report";
+import { onAuthStateChanged } from "firebase/auth";
+import {auth} from "../../database";
 
 const SystemControl = () => {
     const [back, setBack] = useState(false);
+    const [backAction, setBackAction] = useState<'/report' | '/history' | undefined>(undefined);
     const router = useIonRouter();
 
+    const location = useLocation();
+    const history = useHistory();
+
+    const [actionHeader, setActionHeaders] = useState<('report' | 'history' | 'login')[]>([]);
+
+    const [present] = useIonToast();
+    const presentToast = (msg: string, color: string, position: 'top' | 'middle' | 'bottom' = 'bottom') => {
+        present({
+            message: msg,
+            duration: 2000,
+            position: position,
+            color: color
+        });
+    };
+
     useEffect(() => {
-        if (router.routeInfo.pathname === '/history') {
-            setBack(true);
-            return;
-        }
-        setBack(false);
-    }, [router]);
+        onAuthStateChanged(auth, (usr) =>{
+            if(usr){
+                console.log(usr.uid)
+                return;
+            }
+            presentToast("unauthorize user. Login again!", "danger", "top")
+            history.push('/sign-in')
+        })
+    }, []);
+
+    useEffect(() => {
+        setBackAction(location.pathname as ('/report' | '/history' | undefined));
+    }, [location]);
 
     return <IonPage>
         <IonHeader>
@@ -42,18 +68,20 @@ const SystemControl = () => {
                     </IonText>
                 </IonTitle>
                 <IonButtons className={"ion-margin"} slot={"primary"}>
-                    <IonButton color={"dark"} fill={"solid"}>
-                        Report
-                    </IonButton>
-
-                    <IonRouterLink onClick={evt => evt.stopPropagation()}  routerLink={back ? "/system" : "/history"}>
-                        <IonButton color={back ? "dark" :"warning"} fill={"solid"}>
-                            {back ? 'Back' : 'History'}
+                    <IonRouterLink routerLink={ backAction === '/report' ? '/system': '/report'}>
+                        <IonButton color={"dark"} fill={"solid"}>
+                            {backAction === '/report' ? 'Back' : 'Report'}
                         </IonButton>
                     </IonRouterLink>
-                    <IonButton color={"medium"} fill={"solid"}>
+
+                    <IonRouterLink onClick={evt => evt.stopPropagation()}  routerLink={backAction === '/history' ? "/system" : '/history'}>
+                        <IonButton color={backAction === '/history'  ? "dark" :"warning"} fill={"solid"}>
+                            {backAction === '/history' ? 'Back' : 'History'}
+                        </IonButton>
+                    </IonRouterLink>
+                    <IonButton className={'text-white'} color={"warning"} fill={"solid"}>
                         <IonRouterLink routerLink={"/sign-in"}>
-                            Login
+                            Logout
                         </IonRouterLink>
                     </IonButton>
                 </IonButtons>
@@ -61,7 +89,7 @@ const SystemControl = () => {
         </IonHeader>
 
         <IonContent>
-            <div className={'relative'}>
+            <div className={'relative'}  style={{height: 'calc(100% - 75px)'}}>
                 <IonRouterOutlet className={'relative'}>
                     <Route>
                         <Redirect to={'/system'}/>
@@ -72,12 +100,12 @@ const SystemControl = () => {
                     <Route path={'/history'} exact={true}>
                         <History/>
                     </Route>
+                    <Route component={Report} path={'/report'} exact />
                 </IonRouterOutlet>
             </div>
         </IonContent>
-
         <IonFooter>
-            Footer
+            {/*Footer*/}
         </IonFooter>
     </IonPage>
 }

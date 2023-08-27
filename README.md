@@ -12,3 +12,25 @@
 -  Visualizing collection data by the charts
 -  Reporting PDF
 -  Suggestions intelligent for improving the performance system
+
+## demo: https://e-smart-iot.web.app/
+usr: admin@gmail.com
+pwd: 123456
+
+
+## How to run project
+- Clone this repo `
+    git clone https://github.com/luuthuong/e-smart-iot.git
+`
+-  `
+    cd e-smart-iot
+`
+- Install dependencies packages: `
+    npm install
+`
+- Run with development env: `
+  npm run dev
+`
+- To build production: `
+    npm run build
+`

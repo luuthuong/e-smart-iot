@@ -7,10 +7,12 @@ import {
     IonRouterLink,
     IonRow,
     IonTitle,
-    IonToolbar, useIonRouter
+    IonToolbar, useIonRouter, useIonToast
 } from "@ionic/react";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import React, {useEffect, useState} from "react";
 import {Logo} from "../../data/svg-control";
+import {auth} from "../../database";
 
 const SignIn = () => {
 
@@ -19,12 +21,35 @@ const SignIn = () => {
     const [error, setError] = useState(false);
     const [message] = useState<string>("Error");
 
-    useEffect(() => {
+    const [present] = useIonToast();
+    const presentToast = (msg: string, color: string, position: 'top' | 'middle' | 'bottom' = 'bottom') => {
+        present({
+            message: msg,
+            duration: 1500,
+            position: position,
+            color: color
+        });
+    };
 
+    useEffect(() => {
+        signOut(auth).then(() =>{
+
+        }).catch(err =>{
+            console.log(err)
+        })
     }, []);
     const router = useIonRouter();
     const onSignIn = () => {
-        router.push("/system","forward");
+        signInWithEmailAndPassword(auth, userName, password)
+            .then(res =>{
+            console.log(res)
+            if(res.user.uid){
+                presentToast("Login success", "success", "top");
+                router.push("/system","forward");
+            }
+        }).catch(err =>{
+            presentToast("Login failed!", "danger", "top");
+        })
     }
 
     return (
@@ -71,7 +96,7 @@ const SignIn = () => {
                                     className={"ion-margin-top"}
                                     label={"Password"}
                                     labelPlacement={"floating"}
-                                    type={"text"}
+                                    type={"password"}
                                     value={password}
                                     fill={"outline"}
                                     onIonChange={e => setPassword(e.detail.value!)}
@@ -87,15 +112,15 @@ const SignIn = () => {
                                     </IonButton>
                                 </IonCol>
                             </IonRow>
-                            <IonRow>
-                                <IonCol>
-                                    <p>
-                                        Don't have any account?
-                                        <IonRouterLink routerLink={"/sign-up"} color={"danger"} className={""}>Sign
-                                            Up</IonRouterLink>
-                                    </p>
-                                </IonCol>
-                            </IonRow>
+                            {/*<IonRow>*/}
+                            {/*    <IonCol>*/}
+                            {/*        <p>*/}
+                            {/*            Don't have any account?*/}
+                            {/*            <IonRouterLink routerLink={"/sign-up"} color={"danger"} className={""}>Sign*/}
+                            {/*                Up</IonRouterLink>*/}
+                            {/*        </p>*/}
+                            {/*    </IonCol>*/}
+                            {/*</IonRow>*/}
                         </IonGrid>
                     </IonCardContent>
                 </IonCard>

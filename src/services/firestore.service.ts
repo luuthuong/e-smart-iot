@@ -87,30 +87,6 @@ export const getHistorySensorByFilter = async (request: SensorFilterRequest): Pr
     _query.push(
         limit(150)
     )
-    //
-    // if (request.pageRequest) {
-    //     const snap = await getDoc(
-    //         doc(firestore, HISTORY_SENSOR, request.pageRequest.id)
-    //     );
-    //
-    //     console.log(snap.data())
-    //     switch (request.pageRequest.type) {
-    //         case "next":
-    //             _query.push(
-    //                 startAfter(snap.data())
-    //             );
-    //             break;
-    //         case "prev":
-    //             _query.push(
-    //                 endBefore(snap.data())
-    //             );
-    //             break;
-    //         default:
-    //     }
-    //     _query.push(
-    //         limit(request.pageRequest.pageSize)
-    //     )
-    // }
 
     const q = query(sensorRef, ..._query);
     const snapshot = await getDocs(q);

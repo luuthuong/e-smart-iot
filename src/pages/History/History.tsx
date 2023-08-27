@@ -16,7 +16,7 @@ import Tooltip from '@mui/material/Tooltip';
 import {visuallyHidden} from '@mui/utils';
 import {alpha, Box, FormControl, FormControlLabel, Radio, RadioGroup, TableSortLabel} from "@mui/material";
 import {IonIcon} from "@ionic/react";
-import {filterOutline, trashOutline} from "ionicons/icons";
+import {trashOutline} from "ionicons/icons";
 import {DeviceFilterResponse, SensorFilterResponse} from "../../shared";
 import {getHistoryDeviceByFilter, getHistorySensorByFilter} from "../../services";
 import moment from "moment/moment";
@@ -43,7 +43,6 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 }));
 
 
-
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
@@ -56,7 +55,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 
 type Order = 'asc' | 'desc';
 
-function getComparator<T>(order: Order, orderBy: keyof T): (a:T , b: T) => number {
+function getComparator<T>(order: Order, orderBy: keyof T): (a: T, b: T) => number {
     return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
         : (a, b) => -descendingComparator(a, b, orderBy);
@@ -159,7 +158,7 @@ interface EnhancedTableProps<T> {
     data: HeadCell<T>[];
 }
 
-function EnhancedTableHead<T extends {id : string}>(props: EnhancedTableProps<T>) {
+function EnhancedTableHead<T extends { id: string }>(props: EnhancedTableProps<T>) {
     const {onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort, data} =
         props;
     const createSortHandler =
@@ -181,7 +180,7 @@ function EnhancedTableHead<T extends {id : string}>(props: EnhancedTableProps<T>
                         }}
                     />
                 </StyledTableCell>
-                { data.length &&
+                {data.length &&
                     data.map((headCell, index) => (
                         <StyledTableCell
                             key={index}
@@ -246,7 +245,6 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 </Typography>
             ) : (
                 <Typography
-                    // sx={{flex: '1 1 50%'}}
                     variant="h6"
                     id="tableTitle"
                     component="div"
@@ -259,17 +257,18 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                 <RadioGroup className={'flex flex-wrap flex-row'} name="controlled-radio-buttons-group"
                             value={props.typeViewValue}
                             onChange={(val) => props.handleChangeTypeViewChange(val.target.value as unknown as ViewType)}>
-                    <FormControlLabel  value={ViewType.Device} control={<Radio/>} label="Device"/>
-                    <FormControlLabel  value={ViewType.Sensor} control={<Radio/>} label="Sensor"/>
+                    <FormControlLabel value={ViewType.Device} control={<Radio/>} label="Device"/>
+                    <FormControlLabel value={ViewType.Sensor} control={<Radio/>} label="Sensor"/>
                 </RadioGroup>
             </FormControl>
 
             {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <IonIcon icon={trashOutline}></IonIcon>
-                    </IconButton>
-                </Tooltip>
+                // <Tooltip title="Delete">
+                //     <IconButton>
+                //         <IonIcon icon={trashOutline}></IonIcon>
+                //     </IconButton>
+                // </Tooltip>
+                <></>
             ) : (
                 // <Tooltip title="Filter list">
                 //     <IconButton>
@@ -302,9 +301,8 @@ const History = () => {
     const [sensorSelected, setSensorSelected] = useState<readonly string[]>([]);
 
 
-
     useEffect(() => {
-        if(typeView == ViewType.Sensor){
+        if (typeView == ViewType.Sensor) {
             setHeaderSensor(headCellSensor);
             getHistorySensorByFilter({
                 from: new Date('2023/07/25'),
@@ -312,18 +310,18 @@ const History = () => {
                 setSensor(result)
             })
         }
-        if(typeView == ViewType.Device){
+        if (typeView == ViewType.Device) {
             setHeaderDevice(headCellDevice);
 
             getHistoryDeviceByFilter({
                 from: new Date('2023/07/25'),
-            }).then(result =>{
+            }).then(result => {
                 setDevice(result);
             })
         }
     }, [typeView])
 
-    const handleRequestSort = <T,>(
+    const handleRequestSort = <T, >(
         event: React.MouseEvent<unknown>,
         property: keyof T,
     ) => {
@@ -334,7 +332,7 @@ const History = () => {
 
     const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>, type: ViewType) => {
         switch (type) {
-            case ViewType.Sensor:{
+            case ViewType.Sensor: {
                 if (event.target.checked) {
                     const newSelected = sensor.map((n) => n.id);
                     setSensorSelected(newSelected);
@@ -343,7 +341,7 @@ const History = () => {
                 setSensorSelected([]);
                 break;
             }
-            case ViewType.Device:{
+            case ViewType.Device: {
                 if (event.target.checked) {
                     const newSelected = device.map((n) => n.id);
                     setDeviceSelected(newSelected);
@@ -358,44 +356,44 @@ const History = () => {
     };
 
     const handleClick = (event: React.MouseEvent<unknown>, id: string, type: ViewType) => {
-       switch (type) {
-           case ViewType.Sensor:{
-               const selectedIndex = sensorSelected.indexOf(id);
-               let newSelected: readonly string[] = [];
-               if (selectedIndex === -1) {
-                   newSelected = newSelected.concat(sensorSelected, id);
-               } else if (selectedIndex === 0) {
-                   newSelected = newSelected.concat(sensorSelected.slice(1));
-               } else if (selectedIndex === sensorSelected.length - 1) {
-                   newSelected = newSelected.concat(sensorSelected.slice(0, -1));
-               } else if (selectedIndex > 0) {
-                   newSelected = newSelected.concat(
-                       sensorSelected.slice(0, selectedIndex),
-                       sensorSelected.slice(selectedIndex + 1),
-                   );
-               }
-               setSensorSelected(newSelected);
-               break;
-           }
-           case ViewType.Device:{
-               const selectedIndex = deviceSelected.indexOf(id);
-               let newSelected: readonly string[] = [];
-               if (selectedIndex === -1) {
-                   newSelected = newSelected.concat(deviceSelected, id);
-               } else if (selectedIndex === 0) {
-                   newSelected = newSelected.concat(deviceSelected.slice(1));
-               } else if (selectedIndex === deviceSelected.length - 1) {
-                   newSelected = newSelected.concat(deviceSelected.slice(0, -1));
-               } else if (selectedIndex > 0) {
-                   newSelected = newSelected.concat(
-                       deviceSelected.slice(0, selectedIndex),
-                       deviceSelected.slice(selectedIndex + 1),
-                   );
-               }
-               setDeviceSelected(newSelected);
-               break;
-           }
-       }
+        switch (type) {
+            case ViewType.Sensor: {
+                const selectedIndex = sensorSelected.indexOf(id);
+                let newSelected: readonly string[] = [];
+                if (selectedIndex === -1) {
+                    newSelected = newSelected.concat(sensorSelected, id);
+                } else if (selectedIndex === 0) {
+                    newSelected = newSelected.concat(sensorSelected.slice(1));
+                } else if (selectedIndex === sensorSelected.length - 1) {
+                    newSelected = newSelected.concat(sensorSelected.slice(0, -1));
+                } else if (selectedIndex > 0) {
+                    newSelected = newSelected.concat(
+                        sensorSelected.slice(0, selectedIndex),
+                        sensorSelected.slice(selectedIndex + 1),
+                    );
+                }
+                setSensorSelected(newSelected);
+                break;
+            }
+            case ViewType.Device: {
+                const selectedIndex = deviceSelected.indexOf(id);
+                let newSelected: readonly string[] = [];
+                if (selectedIndex === -1) {
+                    newSelected = newSelected.concat(deviceSelected, id);
+                } else if (selectedIndex === 0) {
+                    newSelected = newSelected.concat(deviceSelected.slice(1));
+                } else if (selectedIndex === deviceSelected.length - 1) {
+                    newSelected = newSelected.concat(deviceSelected.slice(0, -1));
+                } else if (selectedIndex > 0) {
+                    newSelected = newSelected.concat(
+                        deviceSelected.slice(0, selectedIndex),
+                        deviceSelected.slice(selectedIndex + 1),
+                    );
+                }
+                setDeviceSelected(newSelected);
+                break;
+            }
+        }
     };
 
     const handleChangePage = (event: unknown, newPage: number) => {
@@ -412,11 +410,11 @@ const History = () => {
     };
 
     const isSelected = (id: string, type: ViewType) => {
-        switch (type){
+        switch (type) {
             case ViewType.Sensor:
                 return sensorSelected.indexOf(id) !== -1;
             case ViewType.Device:
-                return  deviceSelected.indexOf(id) !== -1;
+                return deviceSelected.indexOf(id) !== -1;
             default:
                 return false;
         }
@@ -430,7 +428,7 @@ const History = () => {
                 page * rowsPerPage,
                 page * rowsPerPage + rowsPerPage,
             ),
-        [typeView,sensor, order, orderBy, page, rowsPerPage],
+        [typeView, sensor, order, orderBy, page, rowsPerPage],
     );
 
     const visibleRowsDevice = React.useMemo(
@@ -443,166 +441,166 @@ const History = () => {
     );
 
 
-
     return (
         <StyledEngineProvider injectFirst>
             <Box sx={{width: '90%'}} className={'mx-auto mt-4'}>
                 <Paper sx={{width: '100%', mb: 2}}>
                     <EnhancedTableToolbar typeViewValue={typeView} handleChangeTypeViewChange={setTypeView}
-                                          numSelected={typeView === ViewType.Sensor ? sensorSelected.length : deviceSelected.length }/>
+                                          numSelected={typeView === ViewType.Sensor ? sensorSelected.length : deviceSelected.length}/>
                     {
                         typeView == ViewType.Sensor ? (
-                            <>
-                                <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
-                                    <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
-                                        {
-                                            <EnhancedTableHead
-                                            numSelected={sensorSelected.length}
-                                            order={order}
-                                            orderBy={orderBy}
-                                            onSelectAllClick={evt => handleSelectAllClick(evt, typeView)}
-                                            onRequestSort={(evt, property) => handleRequestSort<SensorFilterResponse>(evt, property)}
-                                            rowCount={sensor.length}
-                                            data={headerSensor}
-                                        />}
-                                        <TableBody>
-                                            {visibleRowsSensor.map((row, index) => {
-                                                const isItemSelected = isSelected(row.id, typeView);
-                                                const labelId = `enhanced-table-checkbox-${index}`;
-                                                return (
-                                                    <TableRow
-                                                        hover
-                                                        onClick={(event) => handleClick(event, row.id, typeView)}
-                                                        role="checkbox"
-                                                        aria-checked={isItemSelected}
-                                                        tabIndex={-1}
-                                                        key={row.id}
-                                                        selected={isItemSelected}
-                                                        sx={{cursor: 'pointer'}}
-                                                    >
-                                                        <TableCell padding="checkbox">
-                                                            <Checkbox
-                                                                color="error"
-                                                                checked={isItemSelected}
-                                                                inputProps={{
-                                                                    'aria-labelledby': labelId,
-                                                                }}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell
-                                                            component="th"
-                                                            id={labelId}
-                                                            scope="row"
-                                                            padding="none"
+                                <>
+                                    <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
+                                        <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
+                                            {
+                                                <EnhancedTableHead
+                                                    numSelected={sensorSelected.length}
+                                                    order={order}
+                                                    orderBy={orderBy}
+                                                    onSelectAllClick={evt => handleSelectAllClick(evt, typeView)}
+                                                    onRequestSort={(evt, property) => handleRequestSort<SensorFilterResponse>(evt, property)}
+                                                    rowCount={sensor.length}
+                                                    data={headerSensor}
+                                                />}
+                                            <TableBody>
+                                                {visibleRowsSensor.map((row, index) => {
+                                                    const isItemSelected = isSelected(row.id, typeView);
+                                                    const labelId = `enhanced-table-checkbox-${index}`;
+                                                    return (
+                                                        <TableRow
+                                                            hover
+                                                            onClick={(event) => handleClick(event, row.id, typeView)}
+                                                            role="checkbox"
+                                                            aria-checked={isItemSelected}
+                                                            tabIndex={-1}
+                                                            key={row.id}
+                                                            selected={isItemSelected}
+                                                            sx={{cursor: 'pointer'}}
                                                         >
-                                                            { moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
-                                                        </TableCell>
-                                                        <TableCell align="right">{row.light}</TableCell>
-                                                        <TableCell align="right">{row.soil}</TableCell>
-                                                        <TableCell align="right">{row.temperature}</TableCell>
-                                                        <TableCell align="right">{row.rain ? 'Rain' : 'Not Rain'}</TableCell>
+                                                            <TableCell padding="checkbox">
+                                                                <Checkbox
+                                                                    color="error"
+                                                                    checked={isItemSelected}
+                                                                    inputProps={{
+                                                                        'aria-labelledby': labelId,
+                                                                    }}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell
+                                                                component="th"
+                                                                id={labelId}
+                                                                scope="row"
+                                                                padding="none"
+                                                            >
+                                                                {moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
+                                                            </TableCell>
+                                                            <TableCell align="right">{row.light}</TableCell>
+                                                            <TableCell align="right">{row.soil}</TableCell>
+                                                            <TableCell align="right">{row.temperature}</TableCell>
+                                                            <TableCell
+                                                                align="right">{row.rain ? 'Rain' : 'Not Rain'}</TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                                {emptyRows(typeView) > 0 && (
+                                                    <TableRow
+                                                        style={{
+                                                            height: (dense ? 33 : 53) * emptyRows(typeView),
+                                                        }}
+                                                    >
+                                                        <TableCell colSpan={6}/>
                                                     </TableRow>
-                                                );
-                                            })}
-                                            {emptyRows(typeView) > 0 && (
-                                                <TableRow
-                                                    style={{
-                                                        height: (dense ? 33 : 53) * emptyRows(typeView),
-                                                    }}
-                                                >
-                                                    <TableCell colSpan={6}/>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                                <TablePagination
-                                    labelRowsPerPage={'rows/page'}
-                                    rowsPerPageOptions={[10, 25, 100]}
-                                    component="div"
-                                    count={sensor.length}
-                                    rowsPerPage={rowsPerPage}
-                                    page={page}
-                                    onPageChange={handleChangePage}
-                                    onRowsPerPageChange={handleChangeRowsPerPage}
-                                />
-                            </>
-                        )
-                            :(
-                             <>
-                                 <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
-                                     <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
-                                         <EnhancedTableHead
-                                             numSelected={deviceSelected.length}
-                                             order={order}
-                                             orderBy={orderBy}
-                                             onSelectAllClick={evt => handleSelectAllClick(evt, typeView)}
-                                             onRequestSort={handleRequestSort}
-                                             rowCount={device.length}
-                                             data={headCellDevice}
-                                         />
-                                         <TableBody>
-                                             {visibleRowsDevice.map((row, index) => {
-                                                 const isItemSelected = isSelected(row.id, typeView);
-                                                 const labelId = `enhanced-table-checkbox-${index}`;
-                                                 return (
-                                                     <TableRow
-                                                         hover
-                                                         onClick={(event) => handleClick(event, row.id, typeView)}
-                                                         role="checkbox"
-                                                         aria-checked={isItemSelected}
-                                                         tabIndex={-1}
-                                                         key={row.id}
-                                                         selected={isItemSelected}
-                                                         sx={{cursor: 'pointer'}}
-                                                     >
-                                                         <TableCell padding="checkbox">
-                                                             <Checkbox
-                                                                 color="error"
-                                                                 checked={isItemSelected}
-                                                                 inputProps={{
-                                                                     'aria-labelledby': labelId,
-                                                                 }}
-                                                             />
-                                                         </TableCell>
-                                                         <TableCell
-                                                             component="th"
-                                                             id={labelId}
-                                                             scope="row"
-                                                             padding="none"
-                                                         >
-                                                             { moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
-                                                         </TableCell>
-                                                         <TableCell align="right">{row.fan ? 'ON' : 'OFF'}</TableCell>
-                                                         <TableCell align="right">{row.light  ? 'ON' : 'OFF'}</TableCell>
-                                                         <TableCell align="right">{row.pump  ? 'ON' : 'OFF'}</TableCell>
-                                                         <TableCell align="right">{row.motor  ? 'ON' : 'OFF'}</TableCell>
-                                                     </TableRow>
-                                                 );
-                                             })}
-                                             {emptyRows(typeView) > 0 && (
-                                                 <TableRow
-                                                     style={{
-                                                         height: (dense ? 33 : 53) * emptyRows(typeView),
-                                                     }}
-                                                 >
-                                                     <TableCell colSpan={6}/>
-                                                 </TableRow>
-                                             )}
-                                         </TableBody>
-                                     </Table>
-                                 </TableContainer>
-                                 <TablePagination
-                                     labelRowsPerPage={'rows/page'}
-                                     rowsPerPageOptions={[10, 25, 100]}
-                                     component="div"
-                                     count={device.length}
-                                     rowsPerPage={rowsPerPage}
-                                     page={page}
-                                     onPageChange={handleChangePage}
-                                     onRowsPerPageChange={handleChangeRowsPerPage}
-                                 />
-                             </>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                    <TablePagination
+                                        labelRowsPerPage={'rows/page'}
+                                        rowsPerPageOptions={[10, 25, 100]}
+                                        component="div"
+                                        count={sensor.length}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        onPageChange={handleChangePage}
+                                        onRowsPerPageChange={handleChangeRowsPerPage}
+                                    />
+                                </>
+                            )
+                            : (
+                                <>
+                                    <TableContainer sx={{maxHeight: '60vh'}} component={Paper}>
+                                        <Table stickyHeader sx={{minWidth: 700}} aria-label="customized table">
+                                            <EnhancedTableHead
+                                                numSelected={deviceSelected.length}
+                                                order={order}
+                                                orderBy={orderBy}
+                                                onSelectAllClick={evt => handleSelectAllClick(evt, typeView)}
+                                                onRequestSort={handleRequestSort}
+                                                rowCount={device.length}
+                                                data={headCellDevice}
+                                            />
+                                            <TableBody>
+                                                {visibleRowsDevice.map((row, index) => {
+                                                    const isItemSelected = isSelected(row.id, typeView);
+                                                    const labelId = `enhanced-table-checkbox-${index}`;
+                                                    return (
+                                                        <TableRow
+                                                            hover
+                                                            onClick={(event) => handleClick(event, row.id, typeView)}
+                                                            role="checkbox"
+                                                            aria-checked={isItemSelected}
+                                                            tabIndex={-1}
+                                                            key={row.id}
+                                                            selected={isItemSelected}
+                                                            sx={{cursor: 'pointer'}}
+                                                        >
+                                                            <TableCell padding="checkbox">
+                                                                <Checkbox
+                                                                    color="error"
+                                                                    checked={isItemSelected}
+                                                                    inputProps={{
+                                                                        'aria-labelledby': labelId,
+                                                                    }}
+                                                                />
+                                                            </TableCell>
+                                                            <TableCell
+                                                                component="th"
+                                                                id={labelId}
+                                                                scope="row"
+                                                                padding="none"
+                                                            >
+                                                                {moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
+                                                            </TableCell>
+                                                            <TableCell align="right">{row.fan ? 'ON' : 'OFF'}</TableCell>
+                                                            <TableCell align="right">{row.light ? 'ON' : 'OFF'}</TableCell>
+                                                            <TableCell align="right">{row.pump ? 'ON' : 'OFF'}</TableCell>
+                                                            <TableCell align="right">{row.motor ? 'ON' : 'OFF'}</TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                                {emptyRows(typeView) > 0 && (
+                                                    <TableRow
+                                                        style={{
+                                                            height: (dense ? 33 : 53) * emptyRows(typeView),
+                                                        }}
+                                                    >
+                                                        <TableCell colSpan={6}/>
+                                                    </TableRow>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                    <TablePagination
+                                        labelRowsPerPage={'rows/page'}
+                                        rowsPerPageOptions={[10, 25, 100]}
+                                        component="div"
+                                        count={device.length}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        onPageChange={handleChangePage}
+                                        onRowsPerPageChange={handleChangeRowsPerPage}
+                                    />
+                                </>
                             )
                     }
                 </Paper>

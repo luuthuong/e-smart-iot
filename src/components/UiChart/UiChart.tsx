@@ -127,7 +127,7 @@ const UiChart = ({
         }
 
         set(ref(database, getLimit(slug!)), data).then(res => {
-            presentToast('Success', 'light', "top");
+            presentToast('Success', 'success', "top");
             setLimit({...data});
         });
 

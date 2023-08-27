@@ -1,6 +1,9 @@
+@import 'react-date-range/dist/styles.css';
+@import 'react-date-range/dist/theme/default.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 .sc-ion-buttons-md-s ion-button:not(.button-round){
     --border-radius: 4px !important;
@@ -22,4 +25,8 @@ a{
     -webkit-backdrop-filter: blur( 8px ) !important;
     border-radius: 10px !important;
     border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+
+.rdrMonth{
+    width: 100% ;
 }
