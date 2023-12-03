@@ -11,12 +11,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import {visuallyHidden} from '@mui/utils';
 import {alpha, Box, FormControl, FormControlLabel, Radio, RadioGroup, TableSortLabel} from "@mui/material";
-import {IonIcon} from "@ionic/react";
-import {trashOutline} from "ionicons/icons";
 import {DeviceFilterResponse, SensorFilterResponse} from "../../shared";
 import {getHistoryDeviceByFilter, getHistorySensorByFilter} from "../../services";
 import moment from "moment/moment";
@@ -169,7 +164,7 @@ function EnhancedTableHead<T extends { id: string }>(props: EnhancedTableProps<T
     return (
         <TableHead>
             <TableRow>
-                <StyledTableCell padding="checkbox">
+                {/* <StyledTableCell padding="checkbox">
                     <Checkbox
                         color="error"
                         indeterminate={numSelected > 0 && numSelected < rowCount}
@@ -179,7 +174,7 @@ function EnhancedTableHead<T extends { id: string }>(props: EnhancedTableProps<T
                             'aria-label': 'select all desserts',
                         }}
                     />
-                </StyledTableCell>
+                </StyledTableCell> */}
                 {data.length &&
                     data.map((headCell, index) => (
                         <StyledTableCell
@@ -194,11 +189,6 @@ function EnhancedTableHead<T extends { id: string }>(props: EnhancedTableProps<T
                                 onClick={createSortHandler(headCell.id)}
                             >
                                 {headCell.label}
-                                {orderBy === headCell.id ? (
-                                    <Box component="span" sx={visuallyHidden}>
-                                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                                    </Box>
-                                ) : null}
                             </TableSortLabel>
                         </StyledTableCell>
                     ))}
@@ -355,47 +345,6 @@ const History = () => {
 
     };
 
-    const handleClick = (event: React.MouseEvent<unknown>, id: string, type: ViewType) => {
-        switch (type) {
-            case ViewType.Sensor: {
-                const selectedIndex = sensorSelected.indexOf(id);
-                let newSelected: readonly string[] = [];
-                if (selectedIndex === -1) {
-                    newSelected = newSelected.concat(sensorSelected, id);
-                } else if (selectedIndex === 0) {
-                    newSelected = newSelected.concat(sensorSelected.slice(1));
-                } else if (selectedIndex === sensorSelected.length - 1) {
-                    newSelected = newSelected.concat(sensorSelected.slice(0, -1));
-                } else if (selectedIndex > 0) {
-                    newSelected = newSelected.concat(
-                        sensorSelected.slice(0, selectedIndex),
-                        sensorSelected.slice(selectedIndex + 1),
-                    );
-                }
-                setSensorSelected(newSelected);
-                break;
-            }
-            case ViewType.Device: {
-                const selectedIndex = deviceSelected.indexOf(id);
-                let newSelected: readonly string[] = [];
-                if (selectedIndex === -1) {
-                    newSelected = newSelected.concat(deviceSelected, id);
-                } else if (selectedIndex === 0) {
-                    newSelected = newSelected.concat(deviceSelected.slice(1));
-                } else if (selectedIndex === deviceSelected.length - 1) {
-                    newSelected = newSelected.concat(deviceSelected.slice(0, -1));
-                } else if (selectedIndex > 0) {
-                    newSelected = newSelected.concat(
-                        deviceSelected.slice(0, selectedIndex),
-                        deviceSelected.slice(selectedIndex + 1),
-                    );
-                }
-                setDeviceSelected(newSelected);
-                break;
-            }
-        }
-    };
-
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
     };
@@ -469,7 +418,6 @@ const History = () => {
                                                     return (
                                                         <TableRow
                                                             hover
-                                                            onClick={(event) => handleClick(event, row.id, typeView)}
                                                             role="checkbox"
                                                             aria-checked={isItemSelected}
                                                             tabIndex={-1}
@@ -477,15 +425,6 @@ const History = () => {
                                                             selected={isItemSelected}
                                                             sx={{cursor: 'pointer'}}
                                                         >
-                                                            <TableCell padding="checkbox">
-                                                                <Checkbox
-                                                                    color="error"
-                                                                    checked={isItemSelected}
-                                                                    inputProps={{
-                                                                        'aria-labelledby': labelId,
-                                                                    }}
-                                                                />
-                                                            </TableCell>
                                                             <TableCell
                                                                 component="th"
                                                                 id={labelId}
@@ -546,7 +485,6 @@ const History = () => {
                                                     return (
                                                         <TableRow
                                                             hover
-                                                            onClick={(event) => handleClick(event, row.id, typeView)}
                                                             role="checkbox"
                                                             aria-checked={isItemSelected}
                                                             tabIndex={-1}
@@ -554,15 +492,6 @@ const History = () => {
                                                             selected={isItemSelected}
                                                             sx={{cursor: 'pointer'}}
                                                         >
-                                                            <TableCell padding="checkbox">
-                                                                <Checkbox
-                                                                    color="error"
-                                                                    checked={isItemSelected}
-                                                                    inputProps={{
-                                                                        'aria-labelledby': labelId,
-                                                                    }}
-                                                                />
-                                                            </TableCell>
                                                             <TableCell
                                                                 component="th"
                                                                 id={labelId}
