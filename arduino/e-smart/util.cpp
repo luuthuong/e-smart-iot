@@ -5,8 +5,8 @@
 #include "Arduino.h"
 #include "UUID.h"
 
-#define WIFI_SSID "TDT"
-#define WIFI_PASSWORD "0869564467"
+#define WIFI_SSID "Thuong"
+#define WIFI_PASSWORD "12346789"
 #define UTC_OFFSET_IN_SECONDS 25200
 
 WiFiUDP ntpUDP;

@@ -13,6 +13,7 @@ void setup() {
   Util::connectWifi();
   Util::beginTimeClient();
   ctrl.setup();
+  
   xTaskCreate(
     Control::pidTask,
     "Task",
