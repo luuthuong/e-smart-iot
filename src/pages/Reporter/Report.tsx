@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
-import { IonButton, IonChip, IonIcon, IonText, IonToggle } from "@ionic/react";
+import {IonButton, IonButtons, IonChip, IonIcon, IonText, IonToggle} from "@ionic/react";
 import { closeOutline, saveOutline } from "ionicons/icons";
 import { Range } from "react-date-range";
 import { DateRangeModal } from "../../components";
@@ -198,6 +198,7 @@ export const Report = () => {
     });
   };
 
+
   return (
     <>
       <div className={"grid grid-cols-4 "}>
@@ -214,16 +215,18 @@ export const Report = () => {
                   {moment(range[0].endDate).format("DD/MM/yyyy")}
                 </IonChip>
               </div>
-              <IonButton
-                onClick={() => setRange([])}
-                size={"small"}
-                color={"light"}
-              >
-                <IonIcon
-                  className={"flex justify-center"}
-                  icon={closeOutline}
-                ></IonIcon>
-              </IonButton>
+             <IonButtons>
+               <IonButton
+                   onClick={() => setRange([])}
+                   size={"small"}
+                   fill={'outline'}
+               >
+                 <IonIcon
+                     className={"flex justify-center"}
+                     icon={closeOutline}
+                 ></IonIcon>
+               </IonButton>
+             </IonButtons>
             </>
           ) : (
             <></>

@@ -18,10 +18,12 @@ export const DateRangeModal = ({close, confirm}:DateRangeModalProps) =>{
     ]);
 
     return <>
-        <IonButton color={'light'}  id="open-modal">
-            Select Date
-            <IonIcon className={'ml-1'} icon={todayOutline}></IonIcon>
-        </IonButton>
+        <IonButtons>
+            <IonButton fill={'outline'} className={'text-black'}  id="open-modal">
+                Select Date
+                <IonIcon className={'ml-1'} icon={todayOutline}></IonIcon>
+            </IonButton>
+        </IonButtons>
         <IonModal
             ref={modal}
             keepContentsMounted={true}
