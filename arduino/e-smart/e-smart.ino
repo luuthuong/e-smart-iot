@@ -13,6 +13,7 @@ void setup() {
   Util::connectWifi();
   Util::beginTimeClient();
   ctrl.setup();
+  
   xTaskCreate(
     Control::pidTask,
     "Task",
@@ -31,10 +32,10 @@ void setup() {
 }
 
 void loop() {
-  bool isReady = ctrl.canExecute() && (millis() - prevMillis > INTERVAL || prevMillis == 0);
-  if (isReady) {
-    ctrl.syncDb();
-    prevMillis = millis();
-  }
+  // bool isReady = ctrl.canExecute() && (millis() - prevMillis > INTERVAL || prevMillis == 0);
+  // if (isReady) {
+  //   ctrl.syncDb();
+  //   prevMillis = millis();
+  // }
   ctrl.run();
 }

@@ -164,17 +164,6 @@ function EnhancedTableHead<T extends { id: string }>(props: EnhancedTableProps<T
     return (
         <TableHead>
             <TableRow>
-                {/* <StyledTableCell padding="checkbox">
-                    <Checkbox
-                        color="error"
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
-                        checked={rowCount > 0 && numSelected === rowCount}
-                        onChange={onSelectAllClick}
-                        inputProps={{
-                            'aria-label': 'select all desserts',
-                        }}
-                    />
-                </StyledTableCell> */}
                 {data.length &&
                     data.map((headCell, index) => (
                         <StyledTableCell
@@ -251,22 +240,6 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
                     <FormControlLabel value={ViewType.Sensor} control={<Radio/>} label="Sensor"/>
                 </RadioGroup>
             </FormControl>
-
-            {numSelected > 0 ? (
-                // <Tooltip title="Delete">
-                //     <IconButton>
-                //         <IonIcon icon={trashOutline}></IonIcon>
-                //     </IconButton>
-                // </Tooltip>
-                <></>
-            ) : (
-                // <Tooltip title="Filter list">
-                //     <IconButton>
-                //         <IonIcon icon={filterOutline}></IonIcon>
-                //     </IconButton>
-                // </Tooltip>
-                <></>
-            )}
         </Toolbar>
     );
 }

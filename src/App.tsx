@@ -11,7 +11,7 @@ import "@ionic/react/css/padding.css";
 import "@ionic/react/css/float-elements.css";
 import "@ionic/react/css/text-alignment.css";
 import "@ionic/react/css/text-transformation.css";
-import "@ionic/react/css/flex-utils.css";
+import "@ionic/react/css/flex-utils.css"; 
 import "@ionic/react/css/display.css";
 
 /* Theme variables */
@@ -20,11 +20,11 @@ import "./styles/index.css";
 import React, { useEffect, useState } from "react";
 import { IonApp, IonBackdrop, setupIonicReact } from "@ionic/react";
 import AppRouter from "./AppRouter";
-import { BackDropContext } from "./shared/context";
+import { BackDropContext } from "./shared/context"; 
 
 setupIonicReact();
 
-const App = () => {
+const App = () => { 
   const [state, setState] = useState<boolean>(false);
 
   return (
