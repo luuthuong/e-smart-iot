@@ -1,5 +1,15 @@
 import React, {useEffect, useState} from 'react'
-import {IonButton, IonButtons, IonIcon, IonRouterLink, IonTitle} from "@ionic/react";
+import {
+    IonButton,
+    IonButtons,
+    IonCol,
+    IonGrid,
+    IonIcon,
+    IonItemDivider,
+    IonRouterLink,
+    IonRow,
+    IonTitle
+} from "@ionic/react";
 import {homeOutline, refreshOutline} from "ionicons/icons";
 import * as tf from "@tensorflow/tfjs";
 import Chart, {Props} from "react-apexcharts";
@@ -9,7 +19,7 @@ import {HISTORY_SENSOR} from "../../shared/constant";
 
 
 export const PredictVisualization = () => {
-    const generateTimestampsForTomorrow = () => {
+    const generateTimestampsForTomorrow = (length = 24) => {
         const timestamps = [];
         const today = new Date();
         const tomorrow = new Date(today);
@@ -19,7 +29,7 @@ export const PredictVisualization = () => {
         tomorrow.setHours(0, 0, 0, 0);
 
         // Generate timestamps at regular intervals throughout the day (every hour, for example)
-        for (let i = 0; i < 24; i++) {
+        for (let i = 0; i < length; i++) {
             const timestamp = new Date(tomorrow);
             timestamp.setHours(i, 0, 0, 0); // Set the hour of the day
             timestamps.push(timestamp.getTime()); // Push timestamp in milliseconds
@@ -33,17 +43,23 @@ export const PredictVisualization = () => {
             options: {
                 chart: {
                     id: "basic-bar"
-                },
-                xaxis: {
-                    categories: generateTimestampsForTomorrow().map(timestamp => {
-                        const date = new Date(timestamp);
-                        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
-                    })
                 }
             },
             series: []
         } as Props
     )
+
+    const [current, setCurrent] = useState<any>(undefined);
+
+    const calculateAverage = (numbers: number[]): string => {
+        if (numbers.length === 0) {
+            return 0;
+        }
+
+        const sum = numbers.reduce((acc, currentValue) => acc + currentValue, 0);
+        return (sum / numbers.length).toFixed(2);
+    }
+
 
     const onPredict = (resolve: (result: any) => any) => {
         const deviceRef = collection(firestore, HISTORY_SENSOR);
@@ -52,7 +68,7 @@ export const PredictVisualization = () => {
                 "time",
                 "desc"
             ),
-            limit(150)
+            limit(50)
         ]
         const snapshot = getDocs(query(deviceRef, ...queryCollection));
         snapshot.then(res => {
@@ -67,9 +83,19 @@ export const PredictVisualization = () => {
             if (step == 0)
                 step = 1;
 
-            for (let i = 0; i <= total; i++) {
-                if (i % step === 0)
-                    result.push(data[i === 0 ? i : i - 1]);
+            for (let i = 0; i < 24; i++) {
+                if (i === 0) {
+                    result.push(data[i]);
+                    continue;
+                }
+
+                const index = i + step;
+                if (index > total) {
+                    result.push(data[total - 1]);
+                    return;
+                }
+
+                result.push(data[index]);
             }
             // Template for sensor data of tomorrow
             const tomorrowTemplate = {
@@ -130,7 +156,7 @@ export const PredictVisualization = () => {
                 // Train the model (you may need more epochs and proper data splitting for training)
                 model.fit(normalizedInputs, normalizedOutputs, {epochs: 100});
                 // Prepare input data for prediction (using tomorrow's template)
-                const timestampsOfTomorrow = generateTimestampsForTomorrow();
+                const timestampsOfTomorrow = generateTimestampsForTomorrow(result.length);
                 const predicted = timestampsOfTomorrow.map(timestamp => {
                     const inputForTomorrow = [
                         timestamp,
@@ -167,8 +193,35 @@ export const PredictVisualization = () => {
 
     const predictHandler = () => {
         onPredict(response => {
+
+            setCurrent({
+                data: {
+                    light: calculateAverage(response.data.map((x: any) => x.light)),
+                    temperature: calculateAverage(response.data.map((x: any) => x.temperature)),
+                    soil: calculateAverage(response.data.map((x: any) => x.temperature))
+                },
+                predicted:{
+                    light: calculateAverage(response.predicted.map((x: any) => x.light)),
+                    temperature: calculateAverage(response.predicted.map((x: any) => x.temperature)),
+                    soil: calculateAverage(response.predicted.map((x: any) => x.soil))
+                }
+            })
+
             setState(prev => ({
                 ...prev,
+                options:
+                    {
+                        chart: {
+                            id: "basic-bar"
+                        },
+                        xaxis: {
+                            categories: generateTimestampsForTomorrow(response.predicted?.length).map(timestamp => {
+                                const date = new Date(timestamp);
+                                return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
+                            })
+                        }
+                    }
+                ,
                 series: [
                     {
                         name: "Light",
@@ -195,18 +248,18 @@ export const PredictVisualization = () => {
                         data: response.predicted.map((x: any) => x.temperature)
                     }
                 ]
-            }))
+            } as Props))
         });
     }
 
     useEffect(() => {
-        predictHandler()
+        predictHandler();
     }, []);
 
 
     return <div className={'px-4'}>
         <div className={'mt-2 flex  justify-end mr-2 items-center'}>
-            <IonTitle className={'font-bold text-gray-600 text-2xl'}>Predict Visualization </IonTitle>
+            <IonTitle className={'font-bold text-gray-600 text-2xl'}>Predict Visualization For Tomorrow</IonTitle>
             <IonButtons>
                 <IonButton color={'light'} fill={'solid'} onClick={predictHandler}>
                     <IonIcon slot={'start'} icon={refreshOutline}/>
@@ -231,5 +284,45 @@ export const PredictVisualization = () => {
                 />
             }
         </div>
+
+        {
+            !!current &&  <div>
+                <IonTitle className={'font-bold text-gray-600 text-xl'}>Average measured value </IonTitle>
+                <IonGrid>
+                    <IonRow className={'justify-center'}>
+                        <IonCol size={4}>
+                            <IonRow className={'text-xl text-blue-600'}>Current</IonRow>
+                            <IonRow>
+                                <IonCol >Light</IonCol>
+                                <IonCol>{current?.data?.light}</IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol>Temperature</IonCol>
+                                <IonCol>{current?.data?.temperature}</IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol>Soil</IonCol>
+                                <IonCol>{current?.data?.soil}</IonCol>
+                            </IonRow>
+                        </IonCol>
+                        <IonCol size={4}>
+                            <IonRow className={'text-xl text-yellow-600'}>Predicted</IonRow>
+                            <IonRow>
+                                <IonCol >Light</IonCol>
+                                <IonCol>{current?.predicted?.light}</IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol>Temperature</IonCol>
+                                <IonCol>{current?.predicted?.temperature}</IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol>Soil</IonCol>
+                                <IonCol>{current?.predicted?.soil}</IonCol>
+                            </IonRow>
+                        </IonCol>
+                    </IonRow>
+                </IonGrid>
+            </div>
+        }
     </div>
 }
