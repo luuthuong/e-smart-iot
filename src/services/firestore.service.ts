@@ -31,7 +31,7 @@ export const getHistoryDeviceByFilter = async (request: DeviceFilterRequest ): P
     _query.push(
         orderBy(
             "time",
-            "asc"
+            "desc"
         )
     )
 
@@ -80,7 +80,7 @@ export const getHistorySensorByFilter = async (request: SensorFilterRequest): Pr
     _query.push(
         orderBy(
             "time",
-            "asc"
+            "desc"
         )
     )
 
