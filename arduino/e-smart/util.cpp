@@ -2,7 +2,6 @@
 #include <WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include "Arduino.h"
 #include "UUID.h"
 
 #define WIFI_SSID "Thuong"

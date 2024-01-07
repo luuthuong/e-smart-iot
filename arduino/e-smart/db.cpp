@@ -1,9 +1,7 @@
 #include "db.h"
-#include <Arduino.h>
 #include <addons/TokenHelper.h>
 #include <addons/RTDBHelper.h>
 #include "UUID.h"
-#include "util.h"
 
 #define API_KEY "AIzaSyDW2CyYpd_sjTfqt2a76ugJ_xZUJ-x76Sc"
 #define DATABASE_URL "https://e-smart-iot-default-rtdb.asia-southeast1.firebasedatabase.app/"
