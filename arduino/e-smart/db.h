@@ -13,7 +13,6 @@ private:
 public:
   Database();
   FirebaseData stream;
-  FirebaseJson json;
   FirebaseData fbdo;
   bool canExecute();
   void connectFirebase();
@@ -28,6 +27,7 @@ public:
   float getFloat(String path);
   String getProjectId();
   void setJson(String path, FirebaseJson json);
+  void setJsonAsync(String path, FirebaseJson json);
   void commitDocument(String path, FirebaseJson json);
 };
 #endif

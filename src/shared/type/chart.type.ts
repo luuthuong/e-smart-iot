@@ -36,7 +36,7 @@ export type ChartType = | 'line'
     | 'treemap';
 
 export type ChartConfig = {
-    formatter?(val: number): string;
+    formatter?(val: number, act?: number): string;
     value?: (string | number)[];
     minValue?: number;
     maxValue?: number;

@@ -18,7 +18,7 @@ export const ListChart = () => {
             value: [30],
             label: ChartConstant[ChartTypeEnum.Temperature],
             formatter(val: number): string {
-                return `${val}%`;
+                return `${val} .C`;
             },
             slug: ChartTypeEnum.Temperature,
             icon: pin

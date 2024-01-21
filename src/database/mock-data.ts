@@ -21,21 +21,28 @@ const createGuid = (): string => {
 export const mockSensorStore = async (startDate: Date, endDate: Date, num: number = 10) => {
     let start = startDate;
     while (start <= endDate) {
+        const date = startDate;
         for (let i = 0; i < num; i++) {
             await setDoc(doc(
                     firestore,
                     "History-Sensor",
                     createGuid()),
                 {
-                    light: rand(30, 70),
+                    light: rand(55, 89),
                     rain: false,
                     soil: rand(75,80),
                     temperature: rand(27, 30),
-                    time: Timestamp.fromDate(start)
+                    time: Timestamp.fromDate(date)
                 } as SensorHistory);
+
+            if(date.getHours() === 23)
+                continue;
+            date.setHours(date.getHours() + 1);
         }
         start.setDate(start.getDate() + 1);
+        start.setHours(0);
     }
+    console.log('mock success');
 }
 
 export const mockDeviceStore = async (startDate: Date, endDate: Date, num: number = 10) => {
@@ -47,13 +54,19 @@ export const mockDeviceStore = async (startDate: Date, endDate: Date, num: numbe
                     "History-Device",
                     createGuid()),
                 {
-                    light: true,
-                    fan: true,
-                    motor: true,
-                    pump: true,
-                    time: Timestamp.fromDate(startDate)
+                    light: Math.random() < 0.1,
+                    fan: Math.random() < 0.5,
+                    motor: Math.random() < 0.4,
+                    pump: Math.random() < 0.6,
+                    time: Timestamp.fromDate(start)
                 } as DeviceHistory);
+
+            if(start.getHours() === 23)
+                continue;
+            start.setHours(start.getHours() + 1);
         }
         start.setDate(startDate.getDate() + 1);
+        start.setHours(0);
     }
+    console.log('mock success');
 }

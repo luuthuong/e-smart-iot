@@ -37,6 +37,7 @@
 
 #define MAX_SPEED 255
 #define MIN_SPEED 0
+#define DEFAULT_SPEED 75
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
@@ -66,6 +67,8 @@ Limit lightLimit(800, 400);
 Limit soilLimit(70, 10);
 
 Device device(false, false, false);
+MotorStateEnum motor_state = MotorStateEnum::NONE;
+
 Sensor sensor;
 
 OneWire oneWire(ONE_WIRE_BUS);
@@ -137,21 +140,26 @@ void limitChangeHandler(String path, String value, String valueType) {
 	String subPath = path.substring(0, path.indexOf('/'));
 	path.remove(0, subPath.length() + 1);
 
-	if (subPath.equals(LIGHT))
+	if (subPath.equals(LIGHT)) {
 		updateLimitChange(&lightLimit, path, value, valueType, "LIGHT");
+		return;
+	}
 
-	if (subPath.equals(SOIL))
+	if (subPath.equals(SOIL)) {
 		updateLimitChange(&soilLimit, path, value, valueType, "SOIL");
+		return;
+	}
 
-	if (subPath.equals(TEMP))
+	if (subPath.equals(TEMP)) {
 		updateLimitChange(&tempLimit, path, value, valueType, "TEMPERATURE");
+		return;
+	}
 }
 
 void mannualModeWrite(String name, int pin, bool state) {
 	Serial.printf("--------MANNUAL TRIGGER--------\n");
 	Serial.printf("STATE %s: %d \n", name, state);
 	digitalWrite(pin, state);
-	motorControl(160, 1);
 	Serial.println("----------------------------");
 }
 
@@ -161,11 +169,16 @@ void mannualControlChangeHandler(String path, String value) {
 
 	path.remove(0, childPath[1].length() + 1);
 	bool active = String(value) == "true";
-	if (path.equals(LAMP)) 
+	if (path.equals(LAMP)) {
 		mannualModeWrite("LAMP", PIN_LAMP, active);
+		return;
+	}
 
-	if (path.equals(MOTOR)) 
-		mannualModeWrite("MOTOR", PIN_EN_MOTOR, active);
+	if (path.equals(MOTOR)) {
+		int direct = active ? RIGHT_DIRECT : LEFT_DIRECT;
+		motorControl(DEFAULT_SPEED, direct);
+		return;
+	}
 
 	if (path.equals(PUMP))
 		mannualModeWrite("PUMP", PIN_PUMP, active);
@@ -173,6 +186,8 @@ void mannualControlChangeHandler(String path, String value) {
 
 void modeChangeHandler(String path, String value) {
 	mode = String(value) == "true";
+	digitalWrite(PIN_LAMP, LOW);
+	digitalWrite(PIN_PUMP, LOW);
 	Serial.printf("Mode: %s\n", value);
 }
 
@@ -224,7 +239,8 @@ int getSoilValue() {
 
 float getLightValue() {
 	float value = lightMeter.readLightLevel();
-	return value < 0 ? 0 : value;
+	float result = value < 0 ? 0 : value;
+	return (100 - map((result), 0, 1050, 0, 100));
 }
 
 float getTemperatureValue() {
@@ -295,9 +311,6 @@ void setup() {
 	pinMode(PIN_FAN, OUTPUT);
 	pinMode(PIN_LAMP, OUTPUT);
 
-	digitalWrite(PIN_TURN_LEFT, LOW);
-	digitalWrite(PIN_TURN_RIGHT, LOW);
-
 	initDisplay();
 	connectFirebase();
 	RTOS_task_setup();
@@ -305,7 +318,7 @@ void setup() {
 
 void loop() {
 	 sendToRealTimeDb();
-	 bool isReady = db.canExecute() && ((millis() - prevMillis > 60000 * 20) || prevMillis == 0);
+	 bool isReady = ((millis() - prevMillis > 60000 * 20) || prevMillis == 0);
 	 if (isReady) {
 		syncDeviceLog();
 		syncSensorLog();
@@ -409,8 +422,24 @@ void displaySensorValues() {
 
 void autoModeTask(void* parameter) {
 	for (;;) {
+		if (motor_state != MotorStateEnum::NONE) {
+			int limitLeft = digitalRead(PIN_LIMIT_LEFT);
+			int limitRight = digitalRead(PIN_LIMIT_RIGHT);
+			if ((limitLeft == LOW && motor_state == MotorStateEnum::LEFT) || (limitRight == LOW && motor_state == MotorStateEnum::RIGHT)) {
+				digitalWrite(PIN_TURN_LEFT, LOW);
+				digitalWrite(PIN_TURN_RIGHT, LOW);
+				digitalWrite(PIN_EN_MOTOR, LOW);
+				motor_state = MotorStateEnum::NONE;
+			}
+		}
+
 		if (!mode)
 			continue;
+		if (sensor.rain)
+			motorControl(DEFAULT_SPEED, RIGHT_DIRECT);
+		else
+			motorControl(DEFAULT_SPEED, LEFT_DIRECT);
+
 		if (sensor.light < lightLimit.low)
 			digitalWrite(PIN_LAMP, HIGH);
 		else
@@ -421,7 +450,7 @@ void autoModeTask(void* parameter) {
 		else
 			digitalWrite(PIN_PUMP, LOW);
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
 }
 
@@ -454,6 +483,7 @@ void syncSensorLog() {
 #pragma region motor control
 // direct = 0 LEFT, direct =  1 RIGHT
 void motorControl(int speed, int direct) {
+  motor_state = direct == RIGHT_DIRECT ? MotorStateEnum::RIGHT : MotorStateEnum::LEFT;
   int limitLeft = digitalRead(PIN_LIMIT_LEFT);
   int limitRight = digitalRead(PIN_LIMIT_RIGHT);
   speed = (speed, MIN_SPEED, MAX_SPEED);
@@ -462,7 +492,9 @@ void motorControl(int speed, int direct) {
     digitalWrite(PIN_TURN_LEFT, LOW);
     digitalWrite(PIN_TURN_RIGHT, LOW);
 	digitalWrite(PIN_EN_MOTOR, LOW);
+	return;
   }
+  digitalWrite(PIN_EN_MOTOR, HIGH);
   switch (direct) {
     case LEFT_DIRECT:
       digitalWrite(PIN_TURN_RIGHT, LOW);
@@ -478,7 +510,7 @@ void motorControl(int speed, int direct) {
 }
 #pragma endregion
 
-#pragma region MyRegion
+#pragma region send to realtime db
 void sendToRealTimeDb() {
 	FirebaseJson jSensor;
 	jSensor.add("light", sensor.light);
@@ -491,7 +523,7 @@ void sendToRealTimeDb() {
 
 	FirebaseJson jDevice;
 	jDevice.set("lamp", device.lamp);
-	jDevice.set("motor", (bool)digitalRead(PIN_EN_MOTOR));
+	jDevice.set("motor", !(bool)digitalRead(PIN_LIMIT_RIGHT));
 	jDevice.set("pump", (bool)digitalRead(PIN_PUMP));
 
 	json.add("devices", jDevice);

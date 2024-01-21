@@ -19,10 +19,14 @@ import {DeviceFilterRequest, DeviceFilterResponse, SensorFilterRequest, SensorFi
 export const getHistoryDeviceByFilter = async (request: DeviceFilterRequest ): Promise<DeviceFilterResponse[]> =>{
     const deviceRef = collection(firestore, HISTORY_DEVICE);
     const _query: any = [
-        where(
-            "time", ">=", Timestamp.fromDate(request.from)
-        )
+
     ];
+    if(request.from)
+        _query.push(
+            where(
+                "time", ">=", Timestamp.fromDate(request.from)
+            )
+        );
     if (request.to)
         _query.push(where(
             "time", "<=", Timestamp.fromDate(<Date>request.to)
@@ -51,11 +55,11 @@ export const getHistoryDeviceByFilter = async (request: DeviceFilterRequest ): P
 export const getHistorySensorByFilter = async (request: SensorFilterRequest): Promise<SensorFilterResponse[]> => {
     const sensorRef = collection(firestore, HISTORY_SENSOR);
 
-    const _query: any = [
-        where(
-            "time", ">=", Timestamp.fromDate(request.from)
-        )
-    ];
+    const _query: any = [];
+    if(request.from)
+       _query.push( where(
+           "time", ">=", Timestamp.fromDate(request.from)
+       ))
     if (request.to)
         _query.push(where(
             "time", "<=", Timestamp.fromDate(<Date>request.to)

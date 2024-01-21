@@ -46,8 +46,20 @@ export const ControlPanel = () => {
 
     const onTriggerDevice = (evt: IonToggleCustomEvent<ToggleChangeEventDetail<any>>) =>{
         const {value: path , checked} = evt.detail;
+        console.log(path)
         set(ref(database, path), checked).then(() =>{
-        });
+        }).then(
+            async () =>{
+                if(path === settingMode && !checked)
+                    await set(ref(database, 'settings/manualController'),
+                        {
+                            lamp: false,
+                            pump: false,
+                            motor: false
+                        }
+                    );
+            }
+        );
     }
 
     return (

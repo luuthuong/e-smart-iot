@@ -7,4 +7,11 @@ class Device{
         bool lamp;
         bool motor;
 };
+
+enum MotorStateEnum
+{
+    NONE,
+    LEFT,
+    RIGHT
+};
 #endif

@@ -8,7 +8,7 @@ export type PageRequest = {
 }
 
 export type SensorFilterRequest = {
-    from: Date;
+    from?: Date;
     to?: Date;
     keyword?: string;
     max?: number;
@@ -18,7 +18,7 @@ export type SensorFilterRequest = {
 }
 
 export type DeviceFilterRequest = {
-    from: Date;
+    from?: Date;
     to?: Date;
     keyword?: string;
     max?: number;

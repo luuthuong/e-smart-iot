@@ -16,7 +16,13 @@ import Chart, {Props} from "react-apexcharts";
 import {collection, getDocs, limit, orderBy, query, Timestamp} from "firebase/firestore";
 import {firestore} from "../../database";
 import {HISTORY_SENSOR} from "../../shared/constant";
+import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 
+
+enum ModelPredict {
+    DENSE,
+    RNN
+}
 
 export const PredictVisualization = () => {
     const generateTimestampsForTomorrow = (length = 24) => {
@@ -155,6 +161,7 @@ export const PredictVisualization = () => {
 
                 // Train the model (you may need more epochs and proper data splitting for training)
                 model.fit(normalizedInputs, normalizedOutputs, {epochs: 100});
+
                 // Prepare input data for prediction (using tomorrow's template)
                 const timestampsOfTomorrow = generateTimestampsForTomorrow(result.length);
                 const predicted = timestampsOfTomorrow.map(timestamp => {
@@ -219,7 +226,10 @@ export const PredictVisualization = () => {
                                 const date = new Date(timestamp);
                                 return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', hour12: false});
                             })
-                        }
+                        },
+                        yaxis:{
+                            decimalsInFloat: 1
+                        },
                     }
                 ,
                 series: [
@@ -251,6 +261,8 @@ export const PredictVisualization = () => {
             } as Props))
         });
     }
+
+    const [modelType, setModelType] = useState<ModelPredict>(ModelPredict.DENSE);
 
     useEffect(() => {
         predictHandler();
@@ -287,7 +299,22 @@ export const PredictVisualization = () => {
 
         {
             !!current &&  <div>
-                <IonTitle className={'font-bold text-gray-600 text-xl'}>Average measured value </IonTitle>
+                <div className={'flex'}>
+                    <IonTitle className={'font-bold text-gray-600 text-xl basis-1'}>Average measured value </IonTitle>
+                    <FormControl >
+                        <InputLabel id="demo-simple-select-label">Model</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={modelType}
+                            label="Age"
+                            onChange={(e) => setModelType(e.target.value as ModelPredict)}
+                        >
+                            <MenuItem value={ModelPredict.DENSE}>NN</MenuItem>
+                            <MenuItem value={ModelPredict.RNN}>RNN</MenuItem>
+                        </Select>
+                    </FormControl>
+                </div>
                 <IonGrid>
                     <IonRow className={'justify-center'}>
                         <IonCol size={4}>

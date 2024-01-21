@@ -11,10 +11,15 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import {alpha, Box, FormControl, FormControlLabel, Radio, RadioGroup, TableSortLabel} from "@mui/material";
+import {alpha, Box, Button, FormControl, FormControlLabel, Radio, RadioGroup, TableSortLabel} from "@mui/material";
 import {DeviceFilterResponse, SensorFilterResponse} from "../../shared";
 import {getHistoryDeviceByFilter, getHistorySensorByFilter} from "../../services";
 import moment from "moment/moment";
+import {IonButton, IonButtons, IonChip, IonIcon, IonText} from "@ionic/react";
+import {mockDeviceStore, mockSensorStore} from "../../database";
+import {DateRangeModal} from "../../components";
+import {Range} from "react-date-range";
+import {closeOutline} from "ionicons/icons";
 
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
@@ -245,6 +250,11 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
 }
 
 
+type TFilter ={
+    startDate?: Date;
+    endDate?: Date;
+}
+
 const History = () => {
 
     const [order, setOrder] = useState<Order>('asc');
@@ -263,12 +273,21 @@ const History = () => {
     const [deviceSelected, setDeviceSelected] = useState<readonly string[]>([]);
     const [sensorSelected, setSensorSelected] = useState<readonly string[]>([]);
 
+    const [filter, setFilter] = useState<TFilter>({
+        startDate: undefined,
+        endDate: undefined
+    });
+
+    useEffect(() => {
+
+    }, [typeView]);
 
     useEffect(() => {
         if (typeView == ViewType.Sensor) {
             setHeaderSensor(headCellSensor);
             getHistorySensorByFilter({
-                from: new Date('2023/07/25'),
+                from: filter.startDate,
+                to: filter.endDate
             }).then(result => {
                 setSensor(result)
             })
@@ -277,12 +296,13 @@ const History = () => {
             setHeaderDevice(headCellDevice);
 
             getHistoryDeviceByFilter({
-                from: new Date('2023/07/25'),
+                from: filter.startDate,
+                to: filter.endDate
             }).then(result => {
                 setDevice(result);
             })
         }
-    }, [typeView])
+    }, [filter, typeView]);
 
     const handleRequestSort = <T, >(
         event: React.MouseEvent<unknown>,
@@ -362,9 +382,66 @@ const History = () => {
         [typeView, device, order, orderBy, page, rowsPerPage],
     );
 
+    // const mockSensor = async () =>{
+    //     const startDate = new Date(2023, 11, 25, 0,0,0,0);
+    //     const endDate = new Date(2023, 11,31, 0,0,0,0);
+    //     await mockSensorStore(startDate, endDate, 23);
+    // }
+    //
+    // const mockDevice = async () =>{
+    //     const startDate = new Date(2023, 11, 20, 0,0,0,0);
+    //     const endDate = new Date(2023, 11,31, 0,0,0,0);
+    //     await mockDeviceStore(startDate, endDate, 23);
+    // }
+
+    const onConfirmDate = (range: Range[]) => {
+        setFilter({
+            startDate: range[0].startDate,
+            endDate: range[0].endDate
+        });
+    }
 
     return (
         <StyledEngineProvider injectFirst>
+            <Box className={'flex justify-end items-center p-2'}>
+                {/*<IonButtons>*/}
+                {/*    <IonButton onClick={mockDevice}>Mock Device</IonButton>*/}
+                    {/*<IonButton onClick={mockSensor}>Mock Sensor</IonButton>*/}
+                {/*</IonButtons>*/}
+
+                {
+                    filter.startDate && filter.endDate ? (
+                    <div className={'mr-8 flex items-center'}>
+                        <IonText>Range:</IonText>
+                        <div>
+                            <IonChip>
+                                {moment(filter.startDate).format("DD/MM/yyyy")}
+                            </IonChip>
+                            -
+                            <IonChip>
+                                {moment(filter.endDate).format("DD/MM/yyyy")}
+                            </IonChip>
+                        </div>
+                        <IonButtons>
+                            <IonButton
+                                onClick={() => setFilter({startDate: undefined, endDate: undefined})}
+                                size={"small"}
+                            >
+                                <IonIcon
+                                    className={"flex justify-center"}
+                                    icon={closeOutline}
+                                ></IonIcon>
+                            </IonButton>
+                        </IonButtons>
+                    </div>
+                ) : (
+                    <></>
+                )}
+
+                <div>
+                    <DateRangeModal confirm={onConfirmDate} />
+                </div>
+            </Box>
             <Box sx={{width: '90%'}} className={'mx-auto mt-4'}>
                 <Paper sx={{width: '100%', mb: 2}}>
                     <EnhancedTableToolbar typeViewValue={typeView} handleChangeTypeViewChange={setTypeView}
