@@ -240,7 +240,7 @@ int getSoilValue() {
 float getLightValue() {
 	float value = lightMeter.readLightLevel();
 	float result = value < 0 ? 0 : value;
-	return (100 - map((result), 0, 1050, 0, 100));
+	return result;
 }
 
 float getTemperatureValue() {
@@ -318,7 +318,7 @@ void setup() {
 
 void loop() {
 	 sendToRealTimeDb();
-	 bool isReady = ((millis() - prevMillis > 60000 * 20) || prevMillis == 0);
+	 bool isReady = ((millis() - prevMillis > 3600000) || prevMillis == 0);
 	 if (isReady) {
 		syncDeviceLog();
 		syncSensorLog();

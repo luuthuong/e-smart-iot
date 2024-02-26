@@ -74,14 +74,15 @@ export const PredictVisualization = () => {
                 "time",
                 "desc"
             ),
-            limit(50)
+            limit(150)
         ]
         const snapshot = getDocs(query(deviceRef, ...queryCollection));
         snapshot.then(res => {
             const data = res.docs.map(x => ({
                 ...x.data(),
                 id: x.id,
-                time: (x.data().time as Timestamp).toMillis()
+                time: (x.data().time as Timestamp).toMillis(),
+                timeString: x.data().time.toDate() as Date
             }))
             const result = [];
             const total = data.length;
