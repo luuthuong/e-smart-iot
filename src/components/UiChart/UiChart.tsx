@@ -86,9 +86,11 @@ const UiChart = ({
         const calc = _value < maxValue ? Math.round(((Number(_value)) / maxValue) * 100) : _value > maxValue ? maxValue : _value;
         const config: ChartConfig = {
             type: props.type,
-            value: [calc],
+            value: [
+                calc
+            ],
             label: label,
-            formatter: props.formatter,
+            formatter: (val) =>props.formatter ? props.formatter(calc, _value) : val.toString(),
             maxValue: maxValue,
             minValue: props.minValue,
         }

@@ -39,10 +39,10 @@ export const ListChart = () => {
             type: 'radialBar',
             value: [75],
             label: ChartConstant[ChartTypeEnum.Light],
-            maxValue: 100,
+            maxValue: 2000,
             slug: ChartTypeEnum.Light,
-            formatter(val: number): string {
-                return `${val}%`;
+            formatter(val: number,act): string {
+                return `${Math.round(act ?? 0) ?? 0}%`;
             },
             icon: sunnyOutline
         }

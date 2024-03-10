@@ -3,3 +3,8 @@ export type Sensor ={
     soil: number;
     temperature: number;
 }
+
+export type ItemPredict = {
+    value: number;
+    timestamp: number;
+}
