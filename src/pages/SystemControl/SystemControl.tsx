@@ -122,7 +122,7 @@ const SystemControl = () => {
       </IonHeader>
 
       <IonContent>
-        <div className={"relative"} style={{ height: "calc(100% - 75px)" }}>
+        <div className={"relative"}>
           <IonRouterOutlet className={"relative"}>
             <Route>
               <Redirect to={"/system"} />

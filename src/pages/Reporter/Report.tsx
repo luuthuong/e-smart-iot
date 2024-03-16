@@ -200,7 +200,9 @@ export const Report = () => {
 
 
   return (
-    <>
+    <div style={{
+      height: 'calc(100vh - 75px)'
+    }}>
       <div className={"grid grid-cols-4 "}>
         <div className={"col-span-3 flex items-center justify-center gap-x-2"}>
           {range.length ? (
@@ -237,7 +239,12 @@ export const Report = () => {
         </div>
       </div>
       {
-        <PDFViewer width={"100%"} height={"100%"}>
+        <div style={
+          {
+            height: 'calc(100% - 45px)'
+          }
+        }>
+          <PDFViewer width={"100%"} height={"100%"}>
           {loading ? (
             <Document>
               <Page size="A4">
@@ -256,7 +263,8 @@ export const Report = () => {
             />
           )}
         </PDFViewer>
+        </div>
       }
-    </>
+    </div>
   );
 };

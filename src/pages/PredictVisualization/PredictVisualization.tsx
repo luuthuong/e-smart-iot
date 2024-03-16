@@ -13,6 +13,7 @@ import { homeOutline, refreshOutline } from "ionicons/icons";
 import * as tf from "@tensorflow/tfjs";
 import Chart, { Props } from "react-apexcharts";
 import {
+    addDoc,
     collection,
     getDocs,
     limit,
@@ -20,14 +21,21 @@ import {
     query,
     Timestamp,
 } from "firebase/firestore";
-import { firestore } from "../../database";
-import { HISTORY_SENSOR } from "../../shared/constant";
+import { PredictHistory, firestore } from "../../database";
+import { HISTORY_SENSOR, PREDICT_HISTORY } from "../../shared/constant";
 import {
     FormControl,
     InputLabel,
     LinearProgress,
     MenuItem,
+    Paper,
     Select,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
 } from "@mui/material";
 import { ModelPredict, PredictFactory } from "./predictions/prediction-factory";
 import moment from "moment";
@@ -100,30 +108,113 @@ export const PredictVisualization = () => {
         });
     };
 
+    function createData(
+        name: string,
+        calories: number,
+        fat: number,
+        carbs: number
+    ) {
+        return { name, calories, fat, carbs };
+    }
+
+    const rows = [
+        createData("Temperature", 159, 6.0, 24),
+        createData("Soil", 237, 9.0, 37),
+        createData("Light", 262, 16.0, 24),
+    ];
+
+    const [predicted, setPredicted] = useState<PredictHistory | undefined>(
+        undefined
+    );
+    useEffect(() => {
+        const _ref = collection(firestore, PREDICT_HISTORY);
+        getDocs(query(_ref, orderBy("time"), limit(1))).then((res) => {
+            const result = res.docs.map(
+                (item) =>
+                    ({
+                        ...item.data(),
+                        time: item.data().time.toDate(),
+                    } as PredictHistory)
+            );
+            if (!result?.length) return;
+
+            setSerieState((curr) => ({
+                ...curr,
+                light: [
+                    {
+                        data: result[0].light.map(Math.round),
+                    },
+                ],
+                soil: [
+                    {
+                        data: result[0].soil.map(Math.round),
+                    },
+                ],
+                temperature: [
+                    {
+                        data: result[0].temperature.map(Math.round),
+                    },
+                ],
+            }));
+
+            setPredicted(result[0] as PredictHistory);
+        });
+    }, []);
+
     useEffect(() => {
         if (modelType === ModelPredict.NONE) return;
-
         const keys: (keyof Sensor)[] = ["light", "soil", "temperature"];
         const loading = new Set(keys);
+        if (chartLoading.length != 0) return;
         setChartLoading(keys);
-        getData().then((result) => {
-            keys.forEach((key) => {
-                PredictFactory[modelType](result.map((x) => x[key])).then(
-                    (res) => {
-                        const predicted = res.map(Math.round);
+        getData().then(async (result) => {
+            Promise.all(
+                keys.map((key) =>
+                    PredictFactory[modelType](result.map((x) => x[key]))
+                )
+            )
+                .then((responses) => {
+                    responses.forEach((res, index) => {
+                        const predict = res.map(Math.round);
                         setSerieState((curr) => ({
                             ...curr,
-                            [key]: [
+                            [keys[index]]: [
                                 {
-                                    data: [...predicted] as number[],
+                                    data: [...predict] as number[],
                                 },
                             ] as ApexAxisChartSeries,
                         }));
-                        loading.delete(key);
+                        loading.delete(keys[index]);
                         setChartLoading([...loading]);
-                    }
-                );
-            });
+                    });
+
+                    const _keys: (keyof Omit<
+                        PredictHistory,
+                        "time" | "timeRange"
+                    >)[] = ["light", "soil", "temperature"];
+                    return responses.reduce(
+                        (prev: PredictHistory, cur, index) => {
+                            prev[_keys[index]] = [...cur] as number[];
+                            return prev;
+                        },
+                        {} as PredictHistory
+                    );
+                })
+                .then((data) => {
+                    data.time = Timestamp.fromDate(new Date());
+                    data.timeRange = getNext7Days();
+                    return Promise.all([
+                        data,
+                        addDoc(collection(firestore, PREDICT_HISTORY), data),
+                    ]);
+                })
+                .then((res) => {
+                    setPredicted(res[0]);
+                    console.log("saved predict", res[1].id);
+                })
+                .catch((e) => {
+                    console.log("error when saved data", e);
+                });
         });
     }, [modelType]);
 
@@ -131,7 +222,7 @@ export const PredictVisualization = () => {
         <div className={"px-4 w-full"}>
             <div className={"mt-2 flex  justify-end mr-2 items-center"}>
                 <IonTitle className={"font-bold text-gray-600 text-2xl"}>
-                    Predict Visualization For Tomorrow
+                    Predict visualization for next week
                 </IonTitle>
                 <IonButtons>
                     <IonButton color={"light"} fill={"solid"}>
@@ -146,7 +237,7 @@ export const PredictVisualization = () => {
                     </IonRouterLink>
                 </IonButtons>
             </div>
-            <FormControl className="my-2">
+            <FormControl disabled={chartLoading.length != 0} className="my-2">
                 <InputLabel id="demo-simple-select-label">Model</InputLabel>
                 <Select
                     labelId="demo-simple-select-label"
@@ -185,77 +276,59 @@ export const PredictVisualization = () => {
                     </div>
                 ))}
             </div>
-            {!!current && (
-                <div>
-                    <div className={"flex"}>
-                        <IonTitle
-                            className={
-                                "font-bold text-gray-600 text-xl basis-1"
-                            }
-                        >
-                            Average measured value{" "}
-                        </IonTitle>
-                        <FormControl>
-                            <InputLabel id="demo-simple-select-label">
-                                Model
-                            </InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={modelType}
-                                onChange={(e) =>
-                                    setModelType(e.target.value as ModelPredict)
-                                }
-                            >
-                                <MenuItem value={ModelPredict.RNN}>
-                                    RNN
-                                </MenuItem>
-                            </Select>
-                        </FormControl>
-                    </div>
-                    <IonGrid>
-                        <IonRow className={"justify-center"}>
-                            <IonCol size={"4"}>
-                                <IonRow className={"text-xl text-blue-600"}>
-                                    Current
-                                </IonRow>
-                                <IonRow>
-                                    <IonCol>Light</IonCol>
-                                    <IonCol>{current?.data?.light}</IonCol>
-                                </IonRow>
-                                <IonRow>
-                                    <IonCol>Temperature</IonCol>
-                                    <IonCol>
-                                        {current?.data?.temperature}
-                                    </IonCol>
-                                </IonRow>
-                                <IonRow>
-                                    <IonCol>Soil</IonCol>
-                                    <IonCol>{current?.data?.soil}</IonCol>
-                                </IonRow>
-                            </IonCol>
-                            <IonCol size={4}>
-                                <IonRow className={"text-xl text-yellow-600"}>
-                                    Predicted
-                                </IonRow>
-                                <IonRow>
-                                    <IonCol>Light</IonCol>
-                                    <IonCol>{current?.predicted?.light}</IonCol>
-                                </IonRow>
-                                <IonRow>
-                                    <IonCol>Temperature</IonCol>
-                                    <IonCol>
-                                        {current?.predicted?.temperature}
-                                    </IonCol>
-                                </IonRow>
-                                <IonRow>
-                                    <IonCol>Soil</IonCol>
-                                    <IonCol>{current?.predicted?.soil}</IonCol>
-                                </IonRow>
-                            </IonCol>
-                        </IonRow>
-                    </IonGrid>
-                </div>
+            <h1 className="text-gray-600 text-2xl font-bold">Last predict</h1>
+            {predicted && (
+                <TableContainer className="mb-10" component={Paper}>
+                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Sensors</TableCell>
+                                {(predicted?.timeRange || getNext7Days()).map(
+                                    (item, index) => (
+                                        <TableCell key={index} align="right">
+                                            {item}
+                                        </TableCell>
+                                    )
+                                )}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {Object.keys(predicted)
+                                .filter(
+                                    (x) => !["time", "timeRange"].includes(x)
+                                )
+                                .map((key, index) => (
+                                    <TableRow
+                                        key={index}
+                                        sx={{
+                                            "&:last-child td, &:last-child th":
+                                                {
+                                                    border: 0,
+                                                },
+                                        }}
+                                    >
+                                        <TableCell component="th" scope="row">
+                                            {key.toUpperCase()}
+                                        </TableCell>
+                                        {(predicted[key] as number[]).map(
+                                            (item, i) => (
+                                                <TableCell
+                                                    key={i}
+                                                    component="th"
+                                                    scope="row"
+                                                    style={{
+                                                        textAlign: "center",
+                                                    }}
+                                                >
+                                                    {Math.round(item)}
+                                                </TableCell>
+                                            )
+                                        )}
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
         </div>
     );
