@@ -1,4 +1,5 @@
-﻿#define PIN_EN_MOTOR 15
+﻿
+#define PIN_EN_MOTOR 15
 #define PIN_TURN_RIGHT 26
 #define PIN_TURN_LEFT 25
 
@@ -21,8 +22,7 @@ void setup()
 
 void loop()
 {
-    motorControl(160, RIGHT_DIRECT);
-	delay(500);
+  motorControl(160, RIGHT_DIRECT);
 }
 
 
