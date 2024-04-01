@@ -83,19 +83,19 @@ void displaySensorValues()
     display.display();
 }
 
-void telebotNotificationTask(void *parameter)
-{
-    for (;;)
-    {
-        int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+// void telebotNotificationTask(void *parameter)
+// {
+//     for (;;)
+//     {
+//         int numNewMessages = bot.getUpdates(bot.last_message_received + 1);
 
-        while (numNewMessages)
-        {
-            Serial.println("got response");
-            handleNewMessages(numNewMessages);
-            numNewMessages = bot.getUpdates(bot.last_message_received + 1);
-        }
-        vTaskDelay(500 / portTICK_PERIOD_MS);
-    }
-}
+//         while (numNewMessages)
+//         {
+//             Serial.println("got response");
+//             handleNewMessages(numNewMessages);
+//             numNewMessages = bot.getUpdates(bot.last_message_received + 1);
+//         }
+//         vTaskDelay(500 / portTICK_PERIOD_MS);
+//     }
+// }
 

@@ -3,6 +3,7 @@
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include "UUID.h"
+#include <WiFi.h>
 
 #define UTC_OFFSET_IN_SECONDS 25200
 
@@ -10,9 +11,25 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", UTC_OFFSET_IN_SECONDS);
 UUID uuid;
 
+#define WIFI_SSID "Thuong"
+#define WIFI_PASSWORD "12346789"
+
 void Util::beginTimeClient()
 {
   timeClient.begin();
+}
+
+void Util::connectWifi()
+{
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("Connectting...");
+    delay(1000);
+  }
+  Serial.println("Connect successfully!");
+  Serial.print("Adress IP: ");
+  Serial.println(WiFi.localIP());
 }
 
 String *Util::splitString(String str, char delimiter)
@@ -66,7 +83,8 @@ String Util::getCurrentDate()
   return dayStr + "-" + monthStr + "-" + yearStr;
 }
 
-String Util::createID(){
+String Util::createID()
+{
   uuid.generate();
   return String(uuid.toCharArray());
 }
