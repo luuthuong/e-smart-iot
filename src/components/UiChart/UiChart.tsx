@@ -82,7 +82,7 @@ const UiChart = ({
     useEffect(() => {
         if (!value)
             return;
-        const _value: number = value[0] as number;
+        const _value: number = Math.round( value[0] as number);
         // const calc = _value < maxValue ? Math.round(((Number(_value)) / maxValue) * 100) : _value > maxValue ? maxValue : _value;
         const config: ChartConfig = {
             type: props.type,
