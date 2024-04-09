@@ -22,6 +22,7 @@ import { Report } from "../Reporter/Report";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../database";
 import {PredictVisualization} from "../PredictVisualization/PredictVisualization";
+import { PageData } from "../PageData/PageData";
 
 const SystemControl = () => {
   const [back, setBack] = useState(false);
@@ -135,6 +136,7 @@ const SystemControl = () => {
             </Route>
             <Route component={Report} path={"/report"} exact />
             <Route component={PredictVisualization} path={'/predict-visualize'} exact={true}/>
+            <Route component={PageData} path={'/pagedata'} exact={true}/>
           </IonRouterOutlet>
         </div>
       </IonContent>

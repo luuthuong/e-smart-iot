@@ -1,20 +1,19 @@
 import * as tf from "@tensorflow/tfjs";
+import { PredictFn, normalize } from "./prediction.type";
 
-export const NeuralNetwork = (
-    historyData: number[]
-): Promise<tf.TypedArray> => {
-    console.log("predict with RNN")
-    // Normalize the data
-    const normalize = (data: tf.Tensor<tf.Rank>) => {
-        const min = tf.min(data);
-        const max = tf.max(data);
-        const normalizedData = data.sub(min).div(max.sub(min));
-        return { normalizedData, min, max };
-    };
-
+export const NeuralNetwork: PredictFn = async (
+    data: number[][]
+): Promise<number[]> => {
+    console.log("predict with RNN");
     // Create tensors from the data
-    const daysTensor = tf.tensor1d(historyData.map((x, i) => i));
-    const historyDataTensor = tf.tensor1d(historyData);
+
+    const flatData = data.reduce((acc, current) => {
+        acc.push(...current);
+        return acc;
+    }, []);
+
+    const daysTensor = tf.tensor1d(flatData.map((x, i) => i));
+    const historyDataTensor = tf.tensor1d(flatData);
 
     // Normalize the data
     const {
@@ -34,10 +33,7 @@ export const NeuralNetwork = (
         1,
         1,
     ]);
-    const reshapedData = normalizedTemps.reshape([
-        normalizedTemps.shape[0],
-        1,
-    ]);
+    const reshapedData = normalizedTemps.reshape([normalizedTemps.shape[0], 1]);
 
     // Build and compile the simple RNN model
     const model = tf.sequential();
@@ -46,26 +42,31 @@ export const NeuralNetwork = (
     model.compile({ optimizer: "sgd", loss: "meanSquaredError" });
 
     // Train the model
-    return model.fit(reshapedDays, reshapedData, { epochs: 1000 }).then(() => {
-        // Make predictions for the next week (replace this with your actual data)
-        const nextWeekDays = [7, 8, 9, 10, 11, 12, 13];
-        const normalizedNextWeekDays = tf
-            .tensor2d(nextWeekDays.map((day) => [day]))
-            .sub(daysMin)
-            .div(daysMax.sub(daysMin))
-            .reshape([nextWeekDays.length, 1, 1]);
+    const result = await model
+        .fit(reshapedDays, reshapedData, { epochs: 1000 })
+        .then(() => {
+            // Make predictions for the next week (replace this with your actual data)
+            const nextWeekDays = [7, 8, 9, 10, 11, 12, 13];
+            const normalizedNextWeekDays = tf
+                .tensor2d(nextWeekDays.map((day) => [day]))
+                .sub(daysMin)
+                .div(daysMax.sub(daysMin))
+                .reshape([nextWeekDays.length, 1, 1]);
 
-        const predictions = model.predict(normalizedNextWeekDays);
+            const predictions = model.predict(
+                normalizedNextWeekDays
+            ) as tf.Tensor<tf.Rank>;
 
-        // Reshape predictions and denormalize
-        const reshapedPredictions = predictions.reshape([
-            nextWeekDays.length,
-            1,
-        ]);
-        const denormalizedPredictions = reshapedPredictions
-            .mul(tempsMax.sub(tempsMin))
-            .add(tempsMin);
-        // Convert denormalizedPredictions tensor to a flat array
-        return denormalizedPredictions.dataSync() as tf.TypedArray;
-    });
+            // Reshape predictions and denormalize
+            const reshapedPredictions = predictions.reshape([
+                nextWeekDays.length,
+                1,
+            ]);
+            const denormalizedPredictions = reshapedPredictions
+                .mul(tempsMax.sub(tempsMin))
+                .add(tempsMin);
+            // Convert denormalizedPredictions tensor to a flat array
+            return denormalizedPredictions.dataSync() as tf.TypedArray;
+        });
+    return [...result].map(x => +x.toFixed(2));
 };

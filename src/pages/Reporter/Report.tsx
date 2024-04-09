@@ -103,7 +103,7 @@ const ReportContent = ({
                 <Text style={styles.tableCell}>{item.temperature}</Text>
               </View>
               <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>{item.soil}</Text>
+                <Text style={styles.tableCell}>{item.rain ? 'Rain' : 'Not rain'}</Text>
               </View>
             </View>
           ))}

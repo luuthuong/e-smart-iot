@@ -1,7 +1,6 @@
-import { onDemoPredict } from "./demo";
-import { LinearRegression } from "./linear-regression";
+import { LinearRegressionV2 } from "./linear-regression-v2";
+import { PredictFn } from "./prediction.type";
 import { NeuralNetwork } from "./neural-network";
-import * as tf from '@tensorflow/tfjs'
 
 export enum ModelPredict {
     NONE,
@@ -10,14 +9,11 @@ export enum ModelPredict {
 }
 
 export const PredictFactory: {
-    [x in ModelPredict] : (historyData: number[])=> Promise<tf.TypedArray>
+    [x in ModelPredict]: PredictFn
 } = {
-    [ModelPredict.LINEAR]: LinearRegression,
+    [ModelPredict.LINEAR]: LinearRegressionV2,
     [ModelPredict.RNN]: NeuralNetwork,
-    [ModelPredict.NONE]: async () => {
-        // console.log('predict')
-        // await onDemoPredict();
-        return new Promise<tf.TypedArray>(() =>{
-        })
-    }
+    [ModelPredict.NONE]: async (data) => {
+        return new Promise<number[]>(() => {});
+    },
 };

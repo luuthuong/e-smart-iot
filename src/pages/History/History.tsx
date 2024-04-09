@@ -483,9 +483,9 @@ const History = () => {
                                                             >
                                                                 {moment(row.time).format("DD-MM-yyyy HH:mm:ss")}
                                                             </TableCell>
-                                                            <TableCell align="right">{row.light}</TableCell>
                                                             <TableCell align="right">{row.soil}</TableCell>
                                                             <TableCell align="right">{row.temperature}</TableCell>
+                                                            <TableCell align="right">{row.light}</TableCell>
                                                             <TableCell
                                                                 align="right">{row.rain ? 'Rain' : 'Not Rain'}</TableCell>
                                                         </TableRow>
