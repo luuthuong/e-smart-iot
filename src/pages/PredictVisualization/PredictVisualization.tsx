@@ -1,17 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     IonButton,
     IonButtons,
-    IonCol,
-    IonGrid,
     IonIcon,
     IonRouterLink,
-    IonRow,
     IonTitle,
 } from "@ionic/react";
-import { homeOutline, refreshOutline, stopCircleOutline } from "ionicons/icons";
-import * as tf from "@tensorflow/tfjs";
-import Chart, { Props } from "react-apexcharts";
+import { homeOutline, refreshOutline } from "ionicons/icons";
+import Chart from "react-apexcharts";
 import {
     addDoc,
     collection,
@@ -28,12 +24,8 @@ import {
     PREDICT_SOIL_ON_LIGHT_TEMPERATURE,
 } from "../../shared/constant";
 import {
-    FormControl,
-    InputLabel,
     LinearProgress,
-    MenuItem,
     Paper,
-    Select,
     Table,
     TableBody,
     TableCell,
@@ -45,9 +37,7 @@ import { ModelPredict, PredictFactory } from "./predictions/prediction-factory";
 import moment from "moment";
 import { Sensor } from "../../shared";
 import { ApexOptions } from "apexcharts";
-import jsonData from "./data.json";
-import { LinearRegressionV2 } from "./predictions/linear-regression-v2";
-import { PredictSoil, onPredictSoil } from "./PredictionSoil";
+import { onPredictSoil } from "./PredictionSoil";
 
 export const PredictVisualization = () => {
     const getNext7Days = () => {
@@ -91,7 +81,11 @@ export const PredictVisualization = () => {
     });
 
     const [data, setData] = useState<(Sensor & { time: Date })[]>([]);
-    const [predictedSoil, setPredictedSoil] = useState<number[]>([]);
+    const [predictedSoil, setPredictedSoil] = useState<string[]>([]);
+
+    const setLoadingPredictSoil = () => {
+        setPredictedSoil(new Array(7).fill("Loading..."));
+    };
 
     const chartTitle: Record<keyof Sensor, string> = {
         light: "Predict light",
@@ -127,6 +121,7 @@ export const PredictVisualization = () => {
         undefined
     );
     useEffect(() => {
+        setLoadingPredictSoil();
         const _ref = collection(firestore, PREDICT_HISTORY);
         getDocs(query(_ref, orderBy("time", "desc"), limit(1))).then((res) => {
             const result = res.docs.map(
@@ -173,7 +168,7 @@ export const PredictVisualization = () => {
                         ...item.data(),
                         time: item.data().time,
                     } as {
-                        data: number[];
+                        data: string[];
                         time: Timestamp;
                     })
             )[0];
@@ -241,6 +236,7 @@ export const PredictVisualization = () => {
                             }));
                             loading.delete(keys[index]);
                             setChartLoading([...loading]);
+                            setLoadingPredictSoil();
                         });
 
                         return responses.reduce(
@@ -265,7 +261,9 @@ export const PredictVisualization = () => {
                                 []
                             )
                         );
-                        setPredictedSoil(predictedSoil);
+                        setPredictedSoil(
+                            predictedSoil.map((item) => item.toString())
+                        );
                         await addDoc(
                             collection(
                                 firestore,

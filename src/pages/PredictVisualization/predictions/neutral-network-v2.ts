@@ -91,6 +91,7 @@ export const NeuralNetworkV2: PredictFn = async (
                 nextData.length,
                 1,
             ]);
+            
             const denormalizedPredictions = reshapedPredictions
                 .mul(outputMax.sub(outputMin))
                 .add(outputMin);

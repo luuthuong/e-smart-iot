@@ -1,5 +1,5 @@
 #include <Arduino.h>
-// #include <ESP32Web.h>
+#include <ESP32Web.h>
 #include "Services/stream-service.h"
 #include "Services/rtos-tasks.h"
 
@@ -14,17 +14,17 @@ void setup()
 {
    Serial.begin(115200);
    delay(2000);
-   // t0_AP_Mode.setInterval(1000, stopAP);
-   // checkWiFiConfig();
-   // Serial.println("Setup done");
-   // if (currentState == STA_Mode)
-   // {
+   t0_AP_Mode.setInterval(1000, stopAP);
+   checkWiFiConfig();
+   Serial.println("Setup done");
+   if (currentState == STA_Mode)
+   {
    Util::connectWifi();
    control.initialize();
    Util::beginTimeClient();
    connectFirebase();
    rtosTaskSetup();
-   // }
+   }
 }
 
 void loop()

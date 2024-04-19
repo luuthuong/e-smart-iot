@@ -29,3 +29,4 @@ yarn-error.log*
 # Optional eslint cache
 .eslintcache
 /.electron-build
+arduino/e-smart-iot-v2/.vscode/extensions.json

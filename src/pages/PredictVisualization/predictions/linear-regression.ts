@@ -9,6 +9,7 @@ export const LinearRegression: PredictFn = async (
         acc.push(...current);
         return acc;
     }, []);
+    
     // Create tensors from the data
     const daysTensor = tf.tensor1d(flatData.map((x, i) => i));
     const historyDataTensor = tf.tensor1d(flatData);

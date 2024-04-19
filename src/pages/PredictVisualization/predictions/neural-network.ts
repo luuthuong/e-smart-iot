@@ -6,7 +6,6 @@ export const NeuralNetwork: PredictFn = async (
 ): Promise<number[]> => {
     console.log("predict with RNN");
     // Create tensors from the data
-
     const flatData = data.reduce((acc, current) => {
         acc.push(...current);
         return acc;
@@ -33,6 +32,7 @@ export const NeuralNetwork: PredictFn = async (
         1,
         1,
     ]);
+
     const reshapedData = normalizedTemps.reshape([normalizedTemps.shape[0], 1]);
 
     // Build and compile the simple RNN model
@@ -62,6 +62,7 @@ export const NeuralNetwork: PredictFn = async (
                 nextWeekDays.length,
                 1,
             ]);
+            
             const denormalizedPredictions = reshapedPredictions
                 .mul(tempsMax.sub(tempsMin))
                 .add(tempsMin);

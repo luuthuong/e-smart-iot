@@ -61,7 +61,7 @@ const String parentPath = "/settings";
 const String childPath[3] = { "/limits", "/manualController", "/mode" };
 #pragma endregion
 
-
+ 
 Limit tempLimit(30, 22);
 Limit lightLimit(800, 400);
 Limit soilLimit(70, 10);
