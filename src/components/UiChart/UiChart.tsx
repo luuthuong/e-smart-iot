@@ -43,6 +43,7 @@ export type UiChartProp = ChartConfig & {
     className?: string;
     slug?: ChartTypeEnum;
     icon?: string;
+    showChart?: boolean;
 };
 
 const UiChart = ({
@@ -54,6 +55,7 @@ const UiChart = ({
     maxValue = 100,
     slug,
     icon,
+    showChart = true,
     ...props
 }: UiChartProp) => {
     const [limit, setLimit] = useState<Limit>({ high: 100, low: 0 });
@@ -308,14 +310,23 @@ const UiChart = ({
                             ></IonSkeletonText>
                         </div>
                     ) : (
-                        config && (
+                        config &&
+                        (showChart ? (
                             <Chart
                                 height={"250"}
                                 options={config.options}
                                 type={"radialBar"}
                                 series={config.series}
                             ></Chart>
-                        )
+                        ) : (
+                            <div style={
+                                {
+                                    height: 'calc(100% - 45px)'
+                                }
+                            } className="flex items-center justify-center">
+                                <h1 className="!text-4xl">{config.series![0].toString()}</h1>
+                            </div>
+                        ))
                     )}
                 </IonCardContent>
             </IonCard>

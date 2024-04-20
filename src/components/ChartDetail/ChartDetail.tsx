@@ -81,16 +81,11 @@ export const ChartDetail = () => {
 
   const getPathByType = (): "light" | "soil" | "temperature" => {
     const param = getParams() as unknown as ChartTypeEnum;
-    switch (param) {
-      case ChartTypeEnum.Light:
-        return "light";
-      case ChartTypeEnum.Temperature:
-        return "temperature";
-      case ChartTypeEnum.Soil:
-        return "soil";
-      default:
-        return "light";
-    }
+    return {
+      [ChartTypeEnum.Light]: "light",
+      [ChartTypeEnum.Temperature]: "temperature",
+      [ChartTypeEnum.Soil]: "soil"
+    }[param] as ReturnType<typeof getPathByType>
   };
 
   useEffect(() => {
@@ -101,7 +96,7 @@ export const ChartDetail = () => {
         onValue(
           ref(database, `actValues/sensors/${getPathByType()}`),
           (snapshot) => {
-            if (data.length >= 10) data.splice(0, 1);
+            if (data.length >= 20) data.splice(0, 1);
             data.push({
               time: new Date().toTimeString().split(" ")[0],
               data: snapshot.val(),
@@ -116,13 +111,10 @@ export const ChartDetail = () => {
           type: "line",
           label: "Chart",
           maxValue: realtimeMode ? undefined : 100,
-          formatter(val: number): string {
-            return `${val}%`;
-          },
           seriesOption: [
             {
               name: "data",
-              data: data.map((x) => x.data),
+              data: [...data.map((x) => x.data)],
             },
           ],
           xAxisData: data.map((x) => x.time),

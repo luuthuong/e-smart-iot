@@ -41,7 +41,8 @@ export const ListChart = () => {
             label: ChartConstant[ChartTypeEnum.Light],
             maxValue: 5,
             slug: ChartTypeEnum.Light,
-            icon: sunnyOutline
+            icon: sunnyOutline,
+            showChart: false
         }
     ];
 
