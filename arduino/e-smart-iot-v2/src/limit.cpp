@@ -1,4 +1,7 @@
 #include "limit.h"
+Limit::Limit(){
+
+}
 
 Limit::Limit(float high, float low)
 {

@@ -2,6 +2,7 @@
 #define device_h
 class Device{
     public:
+        Device();
         Device( bool pump, bool lamp, bool motor);
         bool pump;
         bool lamp;

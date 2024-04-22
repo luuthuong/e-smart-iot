@@ -12,11 +12,13 @@
 #include "device.h"
 #include "sensor.h"
 #include "db.h"
+// #include "telebot.h"
 
 #define FIREBASEJSON_USE_PSRAM
 
 #define DEFAULT_BAUD 115200
 #define INTERVAL_SYNCDB 60000;
+const unsigned long BOT_MTBS = 1000;
 
 #pragma region Pin definition
 
@@ -80,31 +82,33 @@ bool ignore_display = false;
 bool run_mode = false;
 unsigned long prevMillis = 0;
 
-void updateLimitChange(Limit *limit, String path, String value, String valueType, String displayName);
-void limitChangeHandler(String path, String value, String valueType);
-void updateRootLimit(String path, String value);
-void mannualModeWrite(String name, int pin, bool state);
-void mannualControlChangeHandler(String path, String value);
-void modeChangeHandler(String path, String value);
-void pathChangeHandler(String path, String value, String valueType);
-void streamCallback(MultiPathStream stream);
-void streamTimeoutCallback(bool timeout);
-bool getRainValue();
-int getSoilValue();
-float getLightValue();
-float getTemperatureValue();
-void connectFirebase();
-void initDisplay();
-void RTOS_task_setup();
-void getCurrentValuesTask(void *parameter);
-void getSensorValues();
-void getDeviceValues();
-void displaySensorValues();
-void autoModeTask(void *parameter);
-void syncDeviceLog();
-void syncSensorLog();
-void motorControl(int speed, int direct);
-void sendToRealTimeDb();
+#pragma function definition
+  void updateLimitChange(Limit *limit, String path, String value, String valueType, String displayName);
+  void limitChangeHandler(String path, String value, String valueType);
+  void updateRootLimit(String path, String value);
+  void mannualModeWrite(String name, int pin, bool state);
+  void mannualControlChangeHandler(String path, String value);
+  void modeChangeHandler(String path, String value);
+  void pathChangeHandler(String path, String value, String valueType);
+  void streamCallback(MultiPathStream stream);
+  void streamTimeoutCallback(bool timeout);
+  bool getRainValue();
+  int getSoilValue();
+  float getLightValue();
+  float getTemperatureValue();
+  void connectFirebase();
+  void initDisplay();
+  void RTOS_task_setup();
+  void getCurrentValuesTask(void *parameter);
+  void getSensorValues();
+  void getDeviceValues();
+  void displaySensorValues();
+  void autoModeTask(void *parameter);
+  void syncDeviceLog();
+  void syncSensorLog();
+  void motorControl(int speed, int direct);
+  void sendToRealTimeDb();
+#pragma endregion
 
 #pragma region stream subcribe handler
 
@@ -114,12 +118,6 @@ void updateLimitChange(Limit *limit, String path, String value, String valueType
   {
     StaticJsonDocument<100> jsondoc;
     DeserializationError error = deserializeJson(jsondoc, value);
-    if (error)
-    {
-      Serial.println("deserialize json failed!");
-      Serial.println(error.f_str());
-      return;
-    }
     limit->high = jsondoc[HIGH_LIMIT].as<float>();
     limit->low = jsondoc[LOW_LIMIT].as<float>();
   }
@@ -129,23 +127,12 @@ void updateLimitChange(Limit *limit, String path, String value, String valueType
 
   if (path.equals(LOW_LIMIT) && valueType == "int")
     limit->low = value.toFloat();
-
-  Serial.printf("--------%s--------\n", displayName.c_str());
-  Serial.printf("HIGH: %f\nLOW: %f\n", limit->high, limit->low);
-  Serial.println("---------------------");
 }
 
 void updateRootLimit(String path, String value)
 {
   StaticJsonDocument<200> doc;
   DeserializationError error = deserializeJson(doc, value.c_str());
-  if (error)
-  {
-    Serial.println("Deserialize json failed!");
-    Serial.println(error.f_str());
-    return;
-  }
-
   lightLimit.high = doc[LIGHT][HIGH_LIMIT].as<float>();
   lightLimit.low = doc[LIGHT][LOW_LIMIT].as<float>();
 
@@ -154,12 +141,6 @@ void updateRootLimit(String path, String value)
 
   tempLimit.high = doc[TEMP][HIGH_LIMIT].as<float>();
   tempLimit.low = doc[TEMP][LOW_LIMIT].as<float>();
-
-  Serial.println("--------LIMIT SETTING--------");
-  Serial.printf("LIGHT - HIGH: %f\tLOW: %f\n", lightLimit.high, lightLimit.low);
-  Serial.printf("SOIL -  HIGH: %f\tLOW: %f\n", soilLimit.high, soilLimit.low);
-  Serial.printf("TEMPERATURE - HIGH: %f\tLOW: %f\n", tempLimit.high, tempLimit.low);
-  Serial.println("----------------------------");
 }
 
 void limitChangeHandler(String path, String value, String valueType)
@@ -194,10 +175,7 @@ void limitChangeHandler(String path, String value, String valueType)
 
 void mannualModeWrite(String name, int pin, bool state)
 {
-  Serial.printf("--------MANNUAL TRIGGER--------\n");
-  Serial.printf("STATE %s: %d \n", name, state);
   digitalWrite(pin, state);
-  Serial.println("----------------------------");
 }
 
 void mannualControlChangeHandler(String path, String value)
@@ -229,7 +207,6 @@ void modeChangeHandler(String path, String value)
   run_mode = String(value) == "true";
   digitalWrite(PIN_LAMP, LOW);
   digitalWrite(PIN_PUMP, LOW);
-  Serial.printf("Mode: %s\n", value);
 }
 
 void pathChangeHandler(String path, String value, String valueType)
@@ -269,7 +246,13 @@ void streamCallback(MultiPathStream stream)
 void streamTimeoutCallback(bool timeout)
 {
   if (timeout)
-    Serial.println("stream timed out, resuming...\n");
+  {
+    display.clearDisplay();
+    display.println("stream timeout");
+    display.display();
+    delay(2000);
+    display.clearDisplay();
+  }
 }
 #pragma endregion
 
@@ -345,10 +328,8 @@ void setup()
   delay(2000);
   t0_AP_Mode.setInterval(1000, stopAP);
   checkWiFiConfig();
-  Serial.println("Setup done");
   if (currentState == STA_Mode)
   {
-    // Util::connectWifi();
     Util::beginTimeClient();
     Wire.begin(5, 4);
     lightMeter.begin();
@@ -364,6 +345,7 @@ void setup()
     pinMode(PIN_LAMP, OUTPUT);
     initDisplay();
     connectFirebase();
+    // connectTelegram();
     RTOS_task_setup();
   }
 }
@@ -373,6 +355,7 @@ void loop()
   handleState();
   if (currentState != STA_Mode)
     return;
+    
   sendToRealTimeDb();
   bool isReady = ((millis() - prevMillis > 3600000) || prevMillis == 0);
   if (isReady)
@@ -478,10 +461,23 @@ void displaySensorValues()
   display.display();
 }
 
+unsigned long bot_lasttime;
 void autoModeTask(void *parameter)
 {
   for (;;)
   {
+    // if (millis() - bot_lasttime > BOT_MTBS) {
+    //   TelebotData telebotData;
+    //   telebotData.device = device;
+    //   telebotData.sensor = sensor;
+    //   telebotData.mode = run_mode;
+    //   telebotData.lightLimit = lightLimit;
+    //   telebotData.soilLimit = soilLimit;
+    //   telebotData.temperatureLimit = tempLimit;
+    //   runTelebot(telebotData);
+    //   bot_lasttime = millis();
+    // }
+
     if (motor_state != MotorStateEnum::NONE)
     {
       int limitLeft = digitalRead(PIN_LIMIT_LEFT);
@@ -504,6 +500,8 @@ void autoModeTask(void *parameter)
 
     if (sensor.light < lightLimit.low)
       digitalWrite(PIN_LAMP, HIGH);
+    if(sensor.light < lightLimit.low && !sensor.rain)
+      motorControl(DEFAULT_SPEED, LEFT_DIRECT);
     else
       digitalWrite(PIN_LAMP, LOW);
 
@@ -518,8 +516,6 @@ void autoModeTask(void *parameter)
 
 void syncDeviceLog()
 {
-  String currentDate = Util::getCurrentDate();
-  String currentTime = Util::getCurrentTime();
   String documentPath = "History-Device/";
   FirebaseJson content;
   content.set("fields/pump/booleanValue", device.pump);
@@ -531,8 +527,6 @@ void syncDeviceLog()
 
 void syncSensorLog()
 {
-  String currentDate = Util::getCurrentDate();
-  String currentTime = Util::getCurrentTime();
   String documentPath = "History-Sensor/";
   FirebaseJson content;
   content.set("fields/light/integerValue", sensor.light);
