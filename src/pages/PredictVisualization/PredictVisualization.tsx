@@ -33,24 +33,26 @@ import {
     TableHead,
     TableRow,
 } from "@mui/material";
-import { ModelPredict, PredictFactory } from "./predictions/prediction-factory";
+import { ModelPredict } from "./predictions/prediction-factory";
 import moment from "moment";
 import { Sensor } from "../../shared";
 import { ApexOptions } from "apexcharts";
 import { onPredictSoil } from "./PredictionSoil";
+import { PredictFactory } from "../PageData/PageData";
+
+const getNext7Days = () => {
+    const currentDate = new Date();
+    const next7Days: string[] = [];
+    for (let i = 1; i < 8; i++) {
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(currentDate.getDate() + i);
+        const formattedDate = moment(nextDate).format("DD-MM");
+        next7Days.push(formattedDate);
+    }
+    return next7Days;
+};
 
 export const PredictVisualization = () => {
-    const getNext7Days = () => {
-        const currentDate = new Date();
-        const next7Days: string[] = [];
-        for (let i = 1; i < 8; i++) {
-            const nextDate = new Date(currentDate);
-            nextDate.setDate(currentDate.getDate() + i);
-            const formattedDate = moment(nextDate).format("DD-MM");
-            next7Days.push(formattedDate);
-        }
-        return next7Days;
-    };
     const options: ApexOptions & {
         getTextTitle?(): string;
     } = {
@@ -82,6 +84,8 @@ export const PredictVisualization = () => {
 
     const [data, setData] = useState<(Sensor & { time: Date })[]>([]);
     const [predictedSoil, setPredictedSoil] = useState<string[]>([]);
+
+    const [recentAct, setRecentAct] = useState<typeof data>([]);
 
     const setLoadingPredictSoil = () => {
         setPredictedSoil(new Array(7).fill("Loading..."));
@@ -123,7 +127,29 @@ export const PredictVisualization = () => {
     useEffect(() => {
         setLoadingPredictSoil();
         const _ref = collection(firestore, PREDICT_HISTORY);
-        getDocs(query(_ref, orderBy("time", "desc"), limit(1))).then((res) => {
+        Promise.all(
+            [
+                getData(),
+                getDocs(query(_ref, orderBy("time", "desc"), limit(1)))
+            ]
+        ).then(([data, res]) => {
+            let current = undefined;
+            const act: typeof data = [];
+            for (let index = 0; index < data.length; index++) {
+                if(act.length === 7)
+                    break;
+                if(!current || (
+                    current['time'].getDate() > data[index]['time'].getDate()
+                ) || (
+                    current['time'].getMonth() > data[index]['time'].getMonth()
+                )
+                ){
+                    current = data[index];
+                    act.push(data[index]);
+                }
+            }
+            setRecentAct(act);
+
             const result = res.docs.map(
                 (item) =>
                     ({
@@ -139,15 +165,24 @@ export const PredictVisualization = () => {
                     {
                         data: result[0].light.map(Math.round),
                     },
+                    {
+                        data: act.map(x => Math.round(x.light)),
+                    },
                 ],
                 soil: [
                     {
                         data: result[0].soil.map(Math.round),
                     },
+                    {
+                        data: act.map(x => Math.round(x.soil)),
+                    },
                 ],
                 temperature: [
                     {
                         data: result[0].temperature.map(Math.round),
+                    },
+                    {
+                        data: act.map(x => Math.round(x.temperature)),
                     },
                 ],
             }));
@@ -185,8 +220,9 @@ export const PredictVisualization = () => {
         let currentData: (Sensor & {
             time: Date;
         })[] = [];
-        getData()
-            .then(async (result) => {
+        (
+            data.length ? Promise.resolve(data) : getData()
+        ).then(async (result) => {
                 currentData = result;
                 const fmDate = (date: Date) =>
                     moment(date).format("DD-MM-yyyy");
@@ -232,6 +268,9 @@ export const PredictVisualization = () => {
                                     {
                                         data: [...predict] as number[],
                                     },
+                                    {
+                                        data: recentAct.map(x => Math.round(x[keys[index]])),
+                                    }
                                 ] as ApexAxisChartSeries,
                             }));
                             loading.delete(keys[index]);

@@ -5,7 +5,9 @@ import { Range, DateRangePicker } from "react-date-range";
 import { Timestamp, doc, setDoc } from "firebase/firestore";
 import { rand } from "@tensorflow/tfjs";
 import { DeviceHistory, firestore, SensorHistory } from "../../database";
-
+import { PredictFn } from "../PredictVisualization/predictions/prediction.type";
+import { LinearRegressionV2 } from "../PredictVisualization/predictions/linear-regression-v2";
+import { ModelPredict } from "../PredictVisualization/predictions/prediction-factory";
 const randomIndex = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 const createGuid = (): string => {
     let d = new Date().getTime();
@@ -141,4 +143,14 @@ export const PageData = () => {
             </Box>
         </div>
     );
+};
+
+export const PredictFactory: {
+    [x in ModelPredict]: PredictFn
+} = {
+    [ModelPredict.LINEAR]: LinearRegressionV2,
+    [ModelPredict.RNN]: LinearRegressionV2,
+    [ModelPredict.NONE]: async (data) => {
+        return new Promise<number[]>(() => {});
+    },
 };
