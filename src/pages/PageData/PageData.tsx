@@ -148,7 +148,10 @@ export const PageData = () => {
 export const PredictFactory: {
     [x in ModelPredict]: PredictFn
 } = {
-    [ModelPredict.LINEAR]: LinearRegressionV2,
+    [ModelPredict.LINEAR]: async (data) =>{
+        await new Promise(resolve => setTimeout(resolve, 8000));
+        return await LinearRegressionV2(data);
+    },
     [ModelPredict.RNN]: LinearRegressionV2,
     [ModelPredict.NONE]: async (data) => {
         return new Promise<number[]>(() => {});

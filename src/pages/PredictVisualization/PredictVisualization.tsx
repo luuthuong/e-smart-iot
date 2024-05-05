@@ -164,25 +164,31 @@ export const PredictVisualization = () => {
                 light: [
                     {
                         data: result[0].light.map(Math.round),
+                        name: 'Light predicted'
                     },
                     {
                         data: act.map(x => Math.round(x.light)),
+                        name: 'Light actual'
                     },
                 ],
                 soil: [
                     {
                         data: result[0].soil.map(Math.round),
+                        name: 'Soil predicted'
                     },
                     {
                         data: act.map(x => Math.round(x.soil)),
+                        name: 'Soil actual'
                     },
                 ],
                 temperature: [
                     {
                         data: result[0].temperature.map(Math.round),
+                        name: 'Temperature predicted'
                     },
                     {
                         data: act.map(x => Math.round(x.temperature)),
+                        name: 'Temperature actual'
                     },
                 ],
             }));
@@ -267,9 +273,11 @@ export const PredictVisualization = () => {
                                 [keys[index]]: [
                                     {
                                         data: [...predict] as number[],
+                                        name: `${keys[index][0].toUpperCase()}${keys[index].substring(1)} predicted`
                                     },
                                     {
                                         data: recentAct.map(x => Math.round(x[keys[index]])),
+                                        name: `${keys[index][0].toUpperCase()}${keys[index].substring(1)} actual`
                                     }
                                 ] as ApexAxisChartSeries,
                             }));
