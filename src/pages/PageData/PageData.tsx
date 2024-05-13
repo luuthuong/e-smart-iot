@@ -152,7 +152,8 @@ export const PredictFactory: {
 } = {
     [ModelPredict.LINEAR]: async (data) =>{
         __value__ = 0;
-        await new Promise(resolve => setTimeout(resolve, 8000));
+        await LinearRegressionV2(data);
+        await LinearRegressionV2(data);
         return await LinearRegressionV2(data);
     },
     [ModelPredict.RNN]: (data) => {
