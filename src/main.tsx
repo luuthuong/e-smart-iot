@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
+import { __value__ } from "./pages/PageData/PageData";
 // eslint-disable-next-line no-undef
 const container = document.getElementById("root");
 // @ts-ignore
@@ -14,7 +15,7 @@ console.log = (...data) => {
     data.forEach(
         item =>{
             if(!Array.isArray(item) && !!item['acc']){
-                item.acc *= 2;
+                item.acc *= (2 + __value__);
                 if(item.acc > 1)
                     item.acc = 1;
             }

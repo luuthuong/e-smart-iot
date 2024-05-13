@@ -53,7 +53,7 @@ export const LinearRegressionV2: PredictFn = async (inputData: number[][]) => {
 
     // Train the model
     async function trainModel() {
-        const history = await model.fit(normalizedInput, normalizedOutput, {
+        await model.fit(normalizedInput, normalizedOutput, {
             epochs: 100,
             verbose: 1,
             callbacks: {
@@ -86,7 +86,6 @@ export const LinearRegressionV2: PredictFn = async (inputData: number[][]) => {
             const prediction = onPredict([data]);
             result.push(+(+prediction).toFixed(2));
         });
-        console.log("predict result", result);
         return result;
     });
 };
