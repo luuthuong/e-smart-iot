@@ -48,36 +48,37 @@ const normalizedData = (items: Sensor[]): Sensor[] => {
         ...
     ]
 */
-export const recurrentNeutralNetwork: PredictionFn = async (
-    _sensorData: Sensor[]
+export const recurrentNeutralNetwork: PredictFn = async (
+    sensorData: number[][] | number[][][]
 ): Promise<number[]> => {
-    const convertToTensor3D = (data: number[][]) => {
-        const tensor3D = tf.tensor3d(
-            [data],
-            [1, data.length, 3] // [batch_size, time_steps, features]
-        );
-        return tensor3D;
-    };
+    const _sensorData = sensorData as number[][][];
 
-    const input3D = _sensorData.map(({ light, soil, temperature }) => [
-        light,
-        soil,
-        temperature,
-    ]);
+    const output3D = _sensorData.map((x) => [x[0], x[1], x[2]]); 
 
-    const output3D = input3D.map((x) => [x[0], x[1], x[2]]);
+    /*
+        //Output
+        [
+            [200, 50, 32],
+            [232, 51, 32]
+        ]
+    */
 
-    const inputTensor = convertToTensor3D(input3D);
-    const outputTensor = convertToTensor3D(output3D);
+    const inputTensor = tf.tensor3d(
+        _sensorData,
+        [1, _sensorData.length, 3] // [batch_size, time_steps, features]
+    );
+
+    const outputTensor = tf.tensor3d(
+        output3D,
+        [1, _sensorData.length, 3] // [batch_size, time_steps, features]
+    );
 
     const {
-        normalizedData: normalizedInput,
         min: inputMin,
         max: inputMax,
     } = normalize(inputTensor);
 
     const {
-        normalizedData: normalizedOutput,
         min: outputMin,
         max: outputMax,
     } = normalize(outputTensor);
@@ -90,7 +91,6 @@ export const recurrentNeutralNetwork: PredictionFn = async (
             returnSequences: false,
         })
     );
-    // model.add(tf.layers.flatten());
     model.add(
         tf.layers.dense({
             units: 3,
@@ -142,8 +142,9 @@ export const recurrentNeutralNetwork: PredictionFn = async (
             // Convert denormalizedPredictions tensor to a flat array
             return (await denormalizedPredictions.dataSync());
         };
+
         const result: number[] = [];
-        const nextData = input3D.slice(input3D.length - 7);
+        const nextData = _sensorData.slice(_sensorData.length - 7);
 
         nextData.forEach(async (data) => {
             const prediction = await onPredict(data);

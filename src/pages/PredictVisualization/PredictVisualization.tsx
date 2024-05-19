@@ -149,7 +149,6 @@ export const PredictVisualization = () => {
                 }
             }
             setRecentAct(act);
-
             const result = res.docs.map(
                 (item) =>
                     ({
@@ -245,7 +244,8 @@ export const PredictVisualization = () => {
                         data.push(data[0]);
                     }
                     if (data.length > 24)
-                        data.splice(data.length, 24 - data.length);
+                        data.splice(0, 24);
+
                     dataInputPredict.push(
                         data.map((x) => ({
                             light: x.light,
@@ -254,16 +254,19 @@ export const PredictVisualization = () => {
                         })) as Sensor[]
                     );
                 });
+
                 const getInput = (key: keyof Sensor) => {
                     return dataInputPredict.map((items) =>
                         items.map((x) => x[key])
                     );
                 };
 
+                console.time();
                 Promise.all(
                     keys.map((key) => PredictFactory[modelType](getInput(key)))
                 )
                     .then((responses) => {
+                        console.timeEnd();
                         responses.forEach((res, index) => {
                             if (!res.length) return;
 

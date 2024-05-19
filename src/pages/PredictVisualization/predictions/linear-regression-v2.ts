@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { CustomCallbackArgs, Logs } from "@tensorflow/tfjs";
-import { PredictFn, normalize } from "./prediction.type";
+import { Data2D, PredictFn, normalize } from "./prediction.type";
 /** 
  * template data for light
 * [
@@ -13,8 +13,9 @@ import { PredictFn, normalize } from "./prediction.type";
 * 
 * ]
 */
-export const LinearRegressionV2: PredictFn = async (inputData: number[][]) => {
+export const LinearRegressionV2: PredictFn = async (_inputData) => {
     // Output data (labels)
+    const inputData = _inputData as Data2D<number>;
     const outputData = inputData.map((x) => [x[0]]);
 
     // Convert input and output data to tensors

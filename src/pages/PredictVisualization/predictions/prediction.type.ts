@@ -1,9 +1,11 @@
 import * as tf from "@tensorflow/tfjs";
-import { Sensor } from "../../../shared";
 
-export type PredictFn = (inputData: number[][]) => Promise<number[]>;
+export type Data2D<T> = T[][]; 
+export type Data3D<T> = T[][][]; 
 
-export type PredictionFn = (inputData: Sensor[]) => Promise<number[]>;
+export type PredictFn = (inputData: Data2D<number>| Data3D<number>) => Promise<number[]>;
+
+export type PredictionFn = (inputData: Data3D<number>) => Promise<number[]>;
 
 export const normalize = (data: tf.Tensor<tf.Rank>) => {
     const min = tf.min(data);

@@ -2,9 +2,10 @@ import * as tf from "@tensorflow/tfjs";
 import { PredictFn, normalize } from "./prediction.type";
 
 export const NeuralNetwork: PredictFn = async (
-    data: number[][]
+    _data
 ): Promise<number[]> => {
     console.log("predict with RNN");
+    const data = _data as number[][];
     // Create tensors from the data
     const flatData = data.reduce((acc, current) => {
         acc.push(...current);
