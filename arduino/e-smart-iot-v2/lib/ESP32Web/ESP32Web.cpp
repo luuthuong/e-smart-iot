@@ -14,7 +14,7 @@ const char* ap_ssid = "ESP32 Web"; // Hotspot WiFi Name
 const char* ap_password = "esp32web"; // Hotspot WiFi Password
 // How long WiFi Hotspot stays open for 
 // -- Hotspot is energy consuming & chip can get hot
-unsigned long apDuration = 200000; // 3 mins = 180000, 2 mins = 120000, 1 min = 60000
+unsigned long apDuration = 2000000; // 3 mins = 180000, 2 mins = 120000, 1 min = 60000
 bool captiveWebPortal = true; // Would you like to show a captive portal to the user? (true or false)
 
 // Local Website URL

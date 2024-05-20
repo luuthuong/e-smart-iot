@@ -240,3 +240,4 @@ const demo = async () => {
         predict(model, [Math.sin(101)]);
     })();
 };
+

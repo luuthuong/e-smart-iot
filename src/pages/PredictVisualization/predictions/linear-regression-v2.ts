@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { CustomCallbackArgs, Logs } from "@tensorflow/tfjs";
 import { Data2D, PredictFn, normalize } from "./prediction.type";
+
 /** 
  * template data for light
 * [

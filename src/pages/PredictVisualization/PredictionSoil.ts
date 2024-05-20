@@ -33,7 +33,9 @@ export const onPredictSoil = (input: Sensor[], predictData : number[][]) => {
 
     // Define the model
     const model = tf.sequential();
-    model.add(tf.layers.dense({ units: 1, inputShape: [2] }));
+    model.add(
+        tf.layers.dense({ units: 1, inputShape: [2] 
+    }));
 
     // Compile the model
     model.compile({
@@ -48,7 +50,7 @@ export const onPredictSoil = (input: Sensor[], predictData : number[][]) => {
             epochs: 100,
             callbacks: {
                 onBatchEnd(batch, logs: tf.Logs) {
-                    console.log(logs)
+                    // console.log(logs)
                 },
             } as CustomCallbackArgs,
         });

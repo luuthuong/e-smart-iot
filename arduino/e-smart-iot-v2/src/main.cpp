@@ -431,8 +431,8 @@ void displaySensorValues()
   display.print((int)sensor.soil);
   display.print("%");
 
-  display.setCursor(53, 15);
-  display.print("H/L: ");
+  display.setCursor(50, 15);
+  display.print("H/L:");
   display.print((int)soilLimit.high);
   display.print("/");
   display.print((int)soilLimit.low);
@@ -442,8 +442,8 @@ void displaySensorValues()
   display.print((int)sensor.temperature);
   display.print("C");
 
-  display.setCursor(53, 30);
-  display.print("H/L: ");
+  display.setCursor(50, 30);
+  display.print("H/L:");
   display.print((int)tempLimit.high);
   display.print("/");
   display.print((int)tempLimit.low);
@@ -451,10 +451,9 @@ void displaySensorValues()
   display.setCursor(0, 45);
   display.print("L:");
   display.print((int)sensor.light);
-  display.print("%");
 
-  display.setCursor(53, 45);
-  display.print("H/L: ");
+  display.setCursor(50, 45);
+  display.print("H/L:");
   display.print((int)lightLimit.high);
   display.print("/");
   display.print((int)lightLimit.low);
