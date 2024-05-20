@@ -17,6 +17,7 @@ import {
     query,
     Timestamp,
 } from "firebase/firestore";
+import { PredictFactory } from "../PageData/PageData";
 import { PredictHistory, firestore } from "../../database";
 import {
     HISTORY_SENSOR,
@@ -38,7 +39,6 @@ import moment from "moment";
 import { Sensor } from "../../shared";
 import { ApexOptions } from "apexcharts";
 import { onPredictSoil } from "./PredictionSoil";
-import { PredictFactory } from "../PageData/PageData";
 
 const getNext7Days = () => {
     const currentDate = new Date();

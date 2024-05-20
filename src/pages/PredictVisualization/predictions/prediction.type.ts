@@ -1,9 +1,10 @@
 import * as tf from "@tensorflow/tfjs";
 
+export type Data1D<T> = T[]; 
 export type Data2D<T> = T[][]; 
 export type Data3D<T> = T[][][]; 
 
-export type PredictFn = (inputData: Data2D<number>| Data3D<number>) => Promise<number[]>;
+export type PredictFn = (inputData: Data2D<number>| Data3D<number>) => Promise<Data1D<number> | Data2D<number>>;
 
 export type PredictionFn = (inputData: Data3D<number>) => Promise<number[]>;
 
