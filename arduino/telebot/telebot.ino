@@ -8,8 +8,8 @@
 #include <addons/RTDBHelper.h>
 #include "ArduinoJson.h"
 
-#define WIFI_SSID "Thuong"
-#define WIFI_PASSWORD "12346789"
+#define WIFI_SSID "LuuThuong"
+#define WIFI_PASSWORD "12345678"
 #define BOT_TOKEN "6812051387:AAFFZ3UThw0_Kb-U1aS5x5_F2qMQ8OngWV4"
 
 #define API_KEY "AIzaSyDW2CyYpd_sjTfqt2a76ugJ_xZUJ-x76Sc"
@@ -209,10 +209,10 @@ void loop() {
     bot_lasttime = millis();
   }
 
-  if (millis() - data_check_last_time > DATA_CHECK_MS) {
-    dataCheckHandler();
-    data_check_last_time = millis();
-  }
+  // if (millis() - data_check_last_time > DATA_CHECK_MS) {
+  //   dataCheckHandler();
+  //   data_check_last_time = millis();
+  // }
 }
 
 String getMsgCheckData(int value, int high, int low, String display) {

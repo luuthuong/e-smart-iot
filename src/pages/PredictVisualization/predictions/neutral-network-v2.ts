@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { PredictFn, PredictionFn, normalize } from "./prediction.type";
+import { Data1D, Data2D, Data3D, PredictFn, PredictionFn, normalize } from "./prediction.type";
 import { Sensor } from "../../../shared";
 import { CustomCallbackArgs } from "@tensorflow/tfjs";
 
@@ -49,19 +49,10 @@ const normalizedData = (items: Sensor[]): Sensor[] => {
     ]
 */
 export const recurrentNeutralNetwork: PredictFn = async (
-    sensorData: number[][] | number[][][]
-): Promise<number[]> => {
-    const _sensorData = sensorData as number[][][];
-
+    sensorData: Data2D<number> | Data3D<number>
+) => {
+    const _sensorData = sensorData as Data3D<number>;
     const output3D = _sensorData.map((x) => [x[0], x[1], x[2]]); 
-
-    /*
-        //Output
-        [
-            [200, 50, 32],
-            [232, 51, 32]
-        ]
-    */
 
     const inputTensor = tf.tensor3d(
         _sensorData,
@@ -139,17 +130,21 @@ export const recurrentNeutralNetwork: PredictFn = async (
             const denormalizedPredictions = reshapedPredictions
                 .mul(outputMax.sub(outputMin))
                 .add(outputMin);
-            // Convert denormalizedPredictions tensor to a flat array
-            return (await denormalizedPredictions.dataSync());
+            return [
+                ...(
+                    await denormalizedPredictions.dataSync()
+                )
+            ] as Data1D<number>;
         };
 
-        const result: number[] = [];
+        const result: Data2D<number> = [];
         const nextData = _sensorData.slice(_sensorData.length - 7);
 
         nextData.forEach(async (data) => {
             const prediction = await onPredict(data);
-            result.push(+(+prediction).toFixed(2));
+            result.push(prediction).toFixed(2);
         });
+
         return result;
     });
 };

@@ -27,6 +27,7 @@ export const getHistoryDeviceByFilter = async (request: DeviceFilterRequest ): P
                 "time", ">=", Timestamp.fromDate(request.from)
             )
         );
+        
     if (request.to)
         _query.push(where(
             "time", "<=", Timestamp.fromDate(<Date>request.to)

@@ -16,8 +16,12 @@ import { Data2D, PredictFn, normalize } from "./prediction.type";
 */
 export const LinearRegressionV2: PredictFn = async (_inputData) => {
     // Output data (labels)
+    const calcAvg = (items: number[]) => items.reduce(
+        (acc, curr) => acc + curr, 0
+    );
+
     const inputData = _inputData as Data2D<number>;
-    const outputData = inputData.map((x) => [x[0]]);
+    const outputData = inputData.map((x) => [calcAvg(x)]);
 
     // Convert input and output data to tensors
     const inputTensor = tf.tensor2d(inputData);
