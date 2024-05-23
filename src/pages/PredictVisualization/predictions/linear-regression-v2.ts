@@ -21,7 +21,7 @@ export const LinearRegressionV2: PredictFn = async (_inputData) => {
     );
 
     const inputData = _inputData as Data2D<number>;
-    const outputData = inputData.map((x) => [x[0]]);
+    const outputData = inputData.map((x) => [calcAvg(x)]);
 
     // Convert input and output data to tensors
     const inputTensor = tf.tensor2d(inputData);
